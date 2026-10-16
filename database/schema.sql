@@ -1,4 +1,4 @@
--- Esquema de base de datos de UniMarket (prototipo local con SQLite)
+-- Esquema de base de datos de UniSwapt (prototipo local con SQLite)
 -- Cubre RF-01 a RF-11 del documento de requerimientos.
 
 CREATE TABLE IF NOT EXISTS users (

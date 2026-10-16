@@ -1,6 +1,6 @@
 <?php
 /**
- * Constantes globales de UniMarket.
+ * Constantes globales de UniSwapt.
  * Centraliza reglas de negocio para evitar "numeros magicos" repetidos en el codigo.
  */
 

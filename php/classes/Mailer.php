@@ -16,14 +16,14 @@ class Mailer
     {
         $verificationLink = self::buildAppUrl('verify.php?token=' . $token);
 
-        $body = self::renderTemplate('Confirma tu cuenta en UniMarket', "
+        $body = self::renderTemplate('Confirma tu cuenta en UniSwapt', "
             <p>Hola, {$fullName}:</p>
-            <p>Gracias por registrarte en UniMarket con tu correo institucional.</p>
+            <p>Gracias por registrarte en UniSwapt con tu correo institucional.</p>
             <p>Confirma tu cuenta haciendo clic en el siguiente enlace (valido por " . VERIFICATION_TOKEN_TTL_HOURS . " horas):</p>
             <p><a href='{$verificationLink}'>{$verificationLink}</a></p>
         ");
 
-        return self::deliverToSimulatedInbox($toEmail, 'Confirma tu cuenta en UniMarket', $body);
+        return self::deliverToSimulatedInbox($toEmail, 'Confirma tu cuenta en UniSwapt', $body);
     }
 
     public static function sendPasswordResetEmail(string $toEmail, string $fullName, string $token): string
@@ -37,15 +37,15 @@ class Mailer
             <p>Si tu no solicitaste esto, ignora este mensaje.</p>
         ");
 
-        return self::deliverToSimulatedInbox($toEmail, 'Restablece tu contrasena de UniMarket', $body);
+        return self::deliverToSimulatedInbox($toEmail, 'Restablece tu contrasena de UniSwapt', $body);
     }
 
     private static function renderTemplate(string $subject, string $htmlBody): string
     {
         return "<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>{$subject}</title></head>"
             . "<body style='font-family: sans-serif; max-width:520px; margin:40px auto; color:#20242c;'>"
-            . "<h2 style='color:#8a5a2b;'>UniMarket</h2>{$htmlBody}"
-            . "<hr><small>Correo generado por el prototipo local de UniMarket.</small></body></html>";
+            . "<h2 style='color:#8a5a2b;'>UniSwapt</h2>{$htmlBody}"
+            . "<hr><small>Correo generado por el prototipo local de UniSwapt.</small></body></html>";
     }
 
     private static function deliverToSimulatedInbox(string $toEmail, string $subject, string $htmlBody): string

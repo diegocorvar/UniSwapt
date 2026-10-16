@@ -11,7 +11,7 @@ class Database
     public static function getConnection(): PDO
     {
         if (self::$connection === null) {
-            $databaseFile = __DIR__ . '/../../database/unimarket.sqlite';
+            $databaseFile = __DIR__ . '/../../database/uniswapt.sqlite';
             $isFirstRun = !file_exists($databaseFile);
 
             self::$connection = new PDO('sqlite:' . $databaseFile);

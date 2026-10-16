@@ -1,6 +1,6 @@
-# UniMarket — Prototipo local
+# UniSwapt — Prototipo local
 
-Prototipo funcional de UniMarket, la plataforma de compra, venta, trueque y
+Prototipo funcional de UniSwapt, la plataforma de compra, venta, trueque y
 donacion de materiales academicos entre estudiantes de un mismo campus,
 construido a partir del documento de requerimientos y sus 9 historias de
 usuario (HU-01 a HU-09).
@@ -11,18 +11,18 @@ Requisitos: PHP 8.1+ con la extension `pdo_sqlite` (viene activada por
 defecto en la mayoria de instalaciones de PHP).
 
 ```bash
-cd unimarket
+cd uniswapt
 php -S localhost:8000
 ```
 
 Abre `http://localhost:8000` en tu navegador. La base de datos SQLite
-(`database/unimarket.sqlite`) se crea automaticamente la primera vez que se
+(`database/uniswapt.sqlite`) se crea automaticamente la primera vez que se
 ejecuta cualquier pagina, a partir de `database/schema.sql`. No necesitas
 instalar MySQL/PostgreSQL ni configurar nada adicional: todo el prototipo
 corre localmente en un solo archivo de base de datos.
 
 Para "reiniciar" el prototipo con datos limpios, simplemente borra
-`database/unimarket.sqlite` (se regenerara vacia en la siguiente peticion) y
+`database/uniswapt.sqlite` (se regenerara vacia en la siguiente peticion) y
 los archivos dentro de `assets/uploads/*` y `html/emails/*`.
 
 ## Sobre el registro/login e inicio de sesion: es real
@@ -46,7 +46,7 @@ etc.) — toda la logica de generacion/expiracion de tokens seguiria igual.
 ## Estructura de carpetas
 
 ```
-unimarket/
+uniswapt/
 ├── index.php, login.php, register.php, ...   Controladores (uno por pagina)
 ├── assets/
 │   ├── images/            Imagenes propias del sitio (logo, avatar por defecto)
@@ -65,7 +65,7 @@ unimarket/
 │   └── actions/           Procesan cada formulario (POST) y redirigen
 └── database/
     ├── schema.sql         Definicion de tablas
-    └── unimarket.sqlite   Base de datos (se genera sola)
+    └── uniswapt.sqlite    Base de datos (se genera sola)
 ```
 
 Cada pagina en la raiz sigue el mismo patron: obtiene los datos necesarios
@@ -107,7 +107,7 @@ promuevela manualmente ejecutando esto una sola vez:
 
 ```bash
 php -r "
-\$db = new PDO('sqlite:database/unimarket.sqlite');
+\$db = new PDO('sqlite:database/uniswapt.sqlite');
 \$db->exec(\"UPDATE users SET role = 'administrador' WHERE email = 'TU_CORREO@itesa.edu.mx'\");
 echo 'Listo.';
 "
@@ -117,5 +117,5 @@ echo 'Listo.';
 
 La identidad visual se aleja deliberadamente de un dashboard de SaaS
 generico: usa una paleta tipo "tablon de anuncios de campus" (papel kraft,
-tinta oscura, acento ambar) para reforzar que UniMarket es un espacio
+tinta oscura, acento ambar) para reforzar que UniSwapt es un espacio
 informal de intercambio entre estudiantes, no una tienda corporativa.

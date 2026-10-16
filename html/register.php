@@ -2,7 +2,7 @@
     <div class="card form-card">
         <div class="auth-header">
             <span class="pin"></span>
-            <h1>Crea tu cuenta UniMarket</h1>
+            <h1>Crea tu cuenta UniSwapt</h1>
             <p class="text-muted">Reservado para la comunidad ITESA. Usa tu correo institucional.</p>
         </div>
 

@@ -64,6 +64,6 @@ function starsMarkup(float $average): string
 function buildWhatsAppLink(string $phone, string $productTitle): string
 {
     $digitsOnly = preg_replace('/\D/', '', $phone);
-    $message = "Hola, estoy interesado(a) en tu publicacion \"{$productTitle}\" en UniMarket.";
+    $message = "Hola, estoy interesado(a) en tu publicacion \"{$productTitle}\" en UniSwapt.";
     return 'https://wa.me/' . $digitsOnly . '?text=' . rawurlencode($message);
 }

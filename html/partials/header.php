@@ -1,6 +1,6 @@
 <?php
 /** @var string $pageTitle definido por cada vista antes de incluir este partial */
-$pageTitle = $pageTitle ?? 'UniMarket';
+$pageTitle = $pageTitle ?? 'UniSwapt';
 $navUser = isLoggedIn() ? (new User())->findById(currentUserId()) : null;
 ?>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@ $navUser = isLoggedIn() ? (new User())->findById(currentUserId()) : null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= sanitizeText($pageTitle) ?> · UniMarket</title>
+    <title><?= sanitizeText($pageTitle) ?> · UniSwapt</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/components.css">
@@ -17,7 +17,7 @@ $navUser = isLoggedIn() ? (new User())->findById(currentUserId()) : null;
 <body>
 <header class="navbar">
     <div class="container navbar-inner">
-        <a href="index.php" class="navbar-brand">Uni<span>Market</span></a>
+        <a href="index.php" class="navbar-brand">Uni<span>Swapt</span></a>
         <nav>
             <ul class="navbar-links">
                 <li><a href="index.php">Catalogo</a></li>
