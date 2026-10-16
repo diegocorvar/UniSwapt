@@ -20,11 +20,21 @@ if (!$transaction || !$isParticipant) {
     redirectTo('../../dashboard.php');
 }
 
+if ($transaction['transaction_status'] !== 'Aceptada') {
+    flashMessage('error', 'Esta transaccion ya no esta disponible para confirmar o cancelar.');
+    redirectTo('../../dashboard.php?tab=transacciones');
+}
+
 if ($action === 'confirmar') {
     // Flujo 02, paso 4-5: al confirmar ambas partes, la publicacion se cierra.
     $result = $transactionModel->confirmDelivery($transactionId, currentUserId());
 
-    if ($result['completed']) {
+    if (!$result['success']) {
+        $message = $result['reason'] === 'coordinacion_pendiente'
+            ? 'Primero registra el lugar y la fecha del encuentro dentro del campus.'
+            : 'No fue posible confirmar la entrega.';
+        flashMessage('error', $message);
+    } elseif ($result['completed']) {
         $publicationModel->markAsClosed((int) $transaction['publication_id'], $transaction['modality']);
         flashMessage('success', 'Entrega confirmada por ambas partes. La transaccion quedo Completada.');
     } else {

@@ -48,6 +48,16 @@ define('MATERIAL_CATEGORIES', [
 define('ITEM_CONDITIONS', ['Nuevo', 'Usado - Buen Estado', 'Usado - Detalle']);
 define('TRANSACTION_MODALITIES', ['Venta', 'Trueque', 'Donacion']);
 
+// Flujo 02: puntos de encuentro presenciales permitidos dentro del campus.
+define('CAMPUS_MEETING_LOCATIONS', [
+    'Biblioteca',
+    'Cafeteria',
+    'Explanada principal',
+    'Laboratorio',
+    'Edificio academico',
+    'Otro punto acordado dentro del campus',
+]);
+
 define('PUBLICATION_STATUSES', [
     'Disponible',
     'En Proceso de Entrega',

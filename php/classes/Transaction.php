@@ -49,8 +49,60 @@ class Transaction
     /** Flujo 02, excepcion E2: cualquiera de las partes cancela. */
     public function cancel(int $transactionId): void
     {
-        $stmt = $this->db->prepare("UPDATE transactions SET transaction_status = 'Cancelada' WHERE id = :id");
+        $stmt = $this->db->prepare(
+            "UPDATE transactions
+             SET transaction_status = 'Cancelada', coordination_status = 'Cancelada'
+             WHERE id = :id"
+        );
         $stmt->execute(['id' => $transactionId]);
+    }
+
+    /**
+     * Flujo 02, paso 1-3: cualquiera de las partes propone o ajusta el
+     * encuentro presencial antes de confirmar la entrega.
+     */
+    public function updateCoordination(
+        int $transactionId,
+        int $userId,
+        string $meetingLocation,
+        string $meetingAt,
+        ?string $meetingNotes
+    ): array {
+        $transaction = $this->findById($transactionId);
+        if (!$transaction) {
+            return ['success' => false, 'reason' => 'transaccion_inexistente'];
+        }
+
+        $isParticipant = in_array($userId, [(int) $transaction['buyer_id'], (int) $transaction['seller_id']], true);
+        if (!$isParticipant) {
+            return ['success' => false, 'reason' => 'sin_permiso'];
+        }
+
+        if ($transaction['transaction_status'] !== 'Aceptada') {
+            return ['success' => false, 'reason' => 'estado_invalido'];
+        }
+
+        $stmt = $this->db->prepare(
+            "UPDATE transactions
+             SET meeting_location = :meeting_location,
+                 meeting_at = :meeting_at,
+                 meeting_notes = :meeting_notes,
+                 coordination_status = 'Coordinada',
+                 coordination_updated_at = CURRENT_TIMESTAMP
+             WHERE id = :id AND transaction_status = 'Aceptada'"
+        );
+        $stmt->execute([
+            'meeting_location' => $meetingLocation,
+            'meeting_at'       => $meetingAt,
+            'meeting_notes'    => $meetingNotes,
+            'id'               => $transactionId,
+        ]);
+
+        if ($stmt->rowCount() === 0) {
+            return ['success' => false, 'reason' => 'estado_invalido'];
+        }
+
+        return ['success' => true, 'transaction' => $this->findById($transactionId)];
     }
 
     /**
@@ -61,7 +113,17 @@ class Transaction
     {
         $transaction = $this->findById($transactionId);
         if (!$transaction) {
-            return ['success' => false];
+            return ['success' => false, 'reason' => 'transaccion_inexistente'];
+        }
+
+        if ($transaction['transaction_status'] !== 'Aceptada') {
+            return ['success' => false, 'reason' => 'estado_invalido'];
+        }
+
+        if ($transaction['coordination_status'] !== 'Coordinada'
+            || empty($transaction['meeting_location'])
+            || empty($transaction['meeting_at'])) {
+            return ['success' => false, 'reason' => 'coordinacion_pendiente'];
         }
 
         if ((int) $transaction['buyer_id'] === $userId) {
@@ -69,7 +131,7 @@ class Transaction
         } elseif ((int) $transaction['seller_id'] === $userId) {
             $stmt = $this->db->prepare('UPDATE transactions SET seller_confirmed = 1 WHERE id = :id');
         } else {
-            return ['success' => false];
+            return ['success' => false, 'reason' => 'sin_permiso'];
         }
         $stmt->execute(['id' => $transactionId]);
 
@@ -77,7 +139,11 @@ class Transaction
         $bothConfirmed = (bool) $transaction['buyer_confirmed'] && (bool) $transaction['seller_confirmed'];
 
         if ($bothConfirmed) {
-            $complete = $this->db->prepare("UPDATE transactions SET transaction_status = 'Completada' WHERE id = :id");
+            $complete = $this->db->prepare(
+                "UPDATE transactions
+                 SET transaction_status = 'Completada', coordination_status = 'Completada'
+                 WHERE id = :id"
+            );
             $complete->execute(['id' => $transactionId]);
         }
 
