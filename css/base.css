@@ -78,7 +78,7 @@ button, input, select, textarea {
 }
 
 :focus-visible {
-    outline: 3px solid var(--color-accent);
+    outline: 3px solid var(--color-accent-dark);
     outline-offset: 2px;
 }
 
