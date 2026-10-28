@@ -1,0 +1,62 @@
+/*
+  Sistema de diseno de UniSwapt.
+
+  Concepto: un tablon de anuncios de campus, no un dashboard de SaaS.
+  Se inspira en fichas de intercambio pegadas en un corcho universitario:
+  tono papel/kraft, tinta oscura, y un acento ambar tipo "marcador
+  resaltador" para las acciones y el estado de las publicaciones.
+
+  Paleta:
+  - Fondo base:      #F1ECE1 (papel kraft claro)
+  - Superficie:       #FFFDF8 (ficha/tarjeta)
+  - Tinta principal:  #26241E (casi negro calido)
+  - Tinta secundaria: #6B6559
+  - Acento (ambar):   #C97A2B
+  - Acento oscuro:    #8F5518
+  - Exito (verde musgo): #5B7A4F
+  - Alerta (rojo ladrillo): #B4432D
+  - Borde:            #DCD3BF
+*/
+
+:root {
+    --color-bg: #F1ECE1;
+    --color-surface: #FFFDF8;
+    --color-surface-alt: #F7F1E4;
+    --color-ink: #26241E;
+    --color-ink-soft: #6B6559;
+    --color-border: #DCD3BF;
+
+    --color-accent: #C97A2B;
+    --color-accent-dark: #8F5518;
+    --color-accent-deep: #6F3D0F;
+    --color-accent-soft: #F1DCC0;
+
+    --color-success: #5B7A4F;
+    --color-success-soft: #E4EBDF;
+    --color-danger: #B4432D;
+    --color-danger-soft: #F6E2DC;
+    --color-info: #3E6E8E;
+    --color-info-soft: #E2EDF3;
+
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-pin: 999px;
+
+    --shadow-card: 0 1px 0 rgba(38, 36, 30, 0.04), 0 6px 16px rgba(38, 36, 30, 0.07);
+    --shadow-lift: 0 10px 24px rgba(38, 36, 30, 0.12);
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+
+    --max-content-width: 1120px;
+    --max-form-width: 460px;
+}
