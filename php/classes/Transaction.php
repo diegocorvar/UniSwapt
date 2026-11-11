@@ -191,6 +191,21 @@ class Transaction
         return ['success' => true, 'completed' => $bothConfirmed, 'transaction' => $this->findById($transactionId)];
     }
 
+    /**
+     * Flujo 02: una transaccion "Aceptada" (con encuentro pendiente o ya
+     * coordinado) mantiene reservada la publicacion hasta completarse o cancelarse.
+     */
+    public function hasActiveTransactionForPublication(int $publicationId): bool
+    {
+        $stmt = $this->db->prepare(
+            "SELECT 1 FROM transactions
+             WHERE publication_id = :pub_id AND transaction_status = 'Aceptada'
+             LIMIT 1"
+        );
+        $stmt->execute(['pub_id' => $publicationId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function findById(int $id): array|false
     {
         $stmt = $this->db->prepare('SELECT * FROM transactions WHERE id = :id');

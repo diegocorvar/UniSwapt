@@ -17,6 +17,25 @@ if (!in_array($newStatus, PUBLICATION_STATUSES, true)) {
 }
 
 $publicationModel = new Publication();
+$publication = $publicationModel->findById($publicationId);
+
+if (!$publication || (int) $publication['user_id'] !== currentUserId()) {
+    flashMessage('error', 'No fue posible actualizar esa publicacion.');
+    redirectTo('../../dashboard.php');
+}
+
+// RF-10 / Flujo 02: mientras exista una transaccion aceptada (encuentro pendiente
+// o coordinado), el estado lo controla el flujo de entrega. Volver a "Disponible"
+// a mano permitiria recibir y aceptar nuevas propuestas sobre un articulo reservado.
+if ($newStatus !== $publication['publication_status']
+    && (new Transaction())->hasActiveTransactionForPublication($publicationId)) {
+    $message = $newStatus === 'Disponible'
+        ? 'No puedes volver a marcar la publicacion como Disponible mientras haya una entrega en curso. Cancela la transaccion desde tu panel si ya no se realizara.'
+        : 'Hay una entrega en curso para esta publicacion. Completa o cancela la transaccion desde tu panel antes de cambiar su estado.';
+    flashMessage('error', $message);
+    redirectTo('../../product.php?id=' . $publicationId);
+}
+
 $updated = $publicationModel->updateStatus($publicationId, currentUserId(), $newStatus);
 
 flashMessage($updated ? 'success' : 'error', $updated
