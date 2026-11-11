@@ -5,6 +5,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../login.php');
 }
 
+requireValidCsrfToken('../../login.php');
+
 $token = trim($_POST['token'] ?? '');
 $password = $_POST['password'] ?? '';
 $passwordConfirm = $_POST['password_confirm'] ?? '';

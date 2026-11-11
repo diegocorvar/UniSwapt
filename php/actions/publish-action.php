@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../publish.php');
 }
 
+requireValidCsrfToken('../../publish.php');
+
 $title = trim($_POST['title'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $itemCondition = $_POST['item_condition'] ?? '';

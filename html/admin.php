@@ -14,6 +14,7 @@
                     <?php if ($report['evidence']): ?><p class="text-muted" style="margin:0;">Evidencia: <?= sanitizeText($report['evidence']) ?></p><?php endif; ?>
                 </div>
                 <form method="post" action="php/actions/update-report-status-action.php" style="display:flex; gap: var(--space-2); align-items:center;">
+                    <?= csrfField() ?>
                     <input type="hidden" name="report_id" value="<?= (int) $report['id'] ?>">
                     <select class="field-select" name="report_status">
                         <?php foreach (['Pendiente', 'En revision', 'Resuelto', 'Descartado'] as $status): ?>

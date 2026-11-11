@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../dashboard.php');
 }
 
+requireValidCsrfToken('../../dashboard.php');
+
 $transactionId = (int) ($_POST['transaction_id'] ?? 0);
 $action = $_POST['delivery_action'] ?? '';
 

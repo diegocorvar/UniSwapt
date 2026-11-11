@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../dashboard.php?tab=transacciones');
 }
 
+requireValidCsrfToken('../../dashboard.php?tab=transacciones');
+
 $transactionId = (int) ($_POST['transaction_id'] ?? 0);
 $meetingLocation = trim($_POST['meeting_location'] ?? '');
 $meetingAtInput = trim($_POST['meeting_at'] ?? '');

@@ -61,6 +61,7 @@ function statusBadgeFor(string $status): string
                         </div>
                     </div>
                     <form method="post" action="php/actions/respond-transaction-action.php" style="display:flex; gap: var(--space-2);">
+                        <?= csrfField() ?>
                         <input type="hidden" name="transaction_id" value="<?= (int) $proposal['id'] ?>">
                         <button class="btn btn-success btn-sm" name="decision" value="aceptar">Aceptar</button>
                         <button class="btn btn-danger btn-sm" name="decision" value="rechazar">Rechazar</button>
@@ -110,6 +111,7 @@ function statusBadgeFor(string $status): string
 
                     <?php if ($transaction['transaction_status'] === 'Aceptada'): ?>
                         <form method="post" action="php/actions/update-delivery-coordination-action.php" class="card" style="margin: var(--space-3) 0 0; padding: var(--space-3);">
+                            <?= csrfField() ?>
                             <input type="hidden" name="transaction_id" value="<?= (int) $transaction['id'] ?>">
                             <div class="field-group">
                                 <label class="field-label" for="meeting-location-<?= (int) $transaction['id'] ?>">Punto de encuentro en el campus</label>
@@ -132,6 +134,7 @@ function statusBadgeFor(string $status): string
                         </form>
 
                         <form method="post" action="php/actions/confirm-delivery-action.php" style="display:flex; gap: var(--space-2); margin-top: var(--space-3);">
+                            <?= csrfField() ?>
                             <input type="hidden" name="transaction_id" value="<?= (int) $transaction['id'] ?>">
                             <button class="btn btn-success btn-sm" name="delivery_action" value="confirmar" <?= !$canConfirmDelivery || $myConfirmation ? 'disabled' : '' ?>>
                                 <?= $myConfirmation ? 'Ya confirmaste' : 'Confirmar entrega' ?>

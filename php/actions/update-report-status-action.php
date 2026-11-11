@@ -12,6 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../admin.php');
 }
 
+requireValidCsrfToken('../../admin.php');
+
 $reportId = (int) ($_POST['report_id'] ?? 0);
 $newStatus = $_POST['report_status'] ?? '';
 

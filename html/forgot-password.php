@@ -7,6 +7,7 @@
         </div>
 
         <form method="post" action="php/actions/forgot-password-action.php">
+            <?= csrfField() ?>
             <div class="field-group">
                 <label class="field-label" for="email">Correo institucional</label>
                 <input class="field-input" type="email" id="email" name="email" required autofocus>

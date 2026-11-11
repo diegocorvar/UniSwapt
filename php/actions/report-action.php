@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../index.php');
 }
 
+requireValidCsrfToken('../../index.php');
+
 $targetType = $_POST['target_type'] ?? '';
 $targetId = (int) ($_POST['target_id'] ?? 0);
 $reason = trim($_POST['reason'] ?? '');

@@ -5,6 +5,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../login.php');
 }
 
+requireValidCsrfToken('../../login.php');
+
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 
@@ -23,6 +25,7 @@ if (!$result['success']) {
 }
 
 session_regenerate_id(true);
+rotateCsrfToken();
 $_SESSION['user_id'] = (int) $result['user']['id'];
 $_SESSION['user_name'] = $result['user']['full_name'];
 

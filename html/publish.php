@@ -6,6 +6,7 @@
     </div>
 
     <form method="post" action="php/actions/publish-action.php" enctype="multipart/form-data" data-role="publish-form">
+        <?= csrfField() ?>
         <div class="field-group">
             <label class="field-label" for="title">Titulo</label>
             <input class="field-input" type="text" id="title" name="title" placeholder="Ej. Calculadora cientifica Casio fx-991" required>

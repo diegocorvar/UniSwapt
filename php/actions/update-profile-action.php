@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../profile.php');
 }
 
+requireValidCsrfToken('../../profile.php');
+
 $career = trim($_POST['career'] ?? '');
 $semester = trim($_POST['semester'] ?? '');
 $whatsappPhone = trim($_POST['whatsapp_phone'] ?? '');

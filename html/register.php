@@ -7,6 +7,7 @@
         </div>
 
         <form method="post" action="php/actions/register-action.php" data-role="register-form" novalidate>
+            <?= csrfField() ?>
             <div class="field-group">
                 <label class="field-label" for="full_name">Nombre completo</label>
                 <input class="field-input" type="text" id="full_name" name="full_name" required>

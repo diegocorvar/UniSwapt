@@ -63,6 +63,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
             <div class="card" style="background: var(--color-surface-alt);">
                 <h3>Gestionar publicacion</h3>
                 <form method="post" action="php/actions/update-status-action.php" class="field-row" style="align-items:end;">
+                    <?= csrfField() ?>
                     <input type="hidden" name="publication_id" value="<?= (int) $publication['id'] ?>">
                     <div class="field-group" style="margin:0; flex:2;">
                         <label class="field-label" for="publication_status">Estado</label>
@@ -78,6 +79,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
         <?php elseif (isLoggedIn()): ?>
             <?php if ($publication['publication_status'] === 'Disponible'): ?>
                 <form method="post" action="php/actions/propose-transaction-action.php" class="card" style="margin-bottom: var(--space-4);">
+                    <?= csrfField() ?>
                     <input type="hidden" name="publication_id" value="<?= (int) $publication['id'] ?>">
                     <h3>Enviar propuesta</h3>
                     <?php if ($publication['modality'] === 'Venta'): ?>
@@ -102,6 +104,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
             <details>
                 <summary class="text-muted" style="cursor:pointer;">Reportar esta publicacion</summary>
                 <form method="post" action="php/actions/report-action.php" style="margin-top: var(--space-3);">
+                    <?= csrfField() ?>
                     <input type="hidden" name="target_type" value="publicacion">
                     <input type="hidden" name="target_id" value="<?= (int) $publication['id'] ?>">
                     <div class="field-group">

@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../dashboard.php');
 }
 
+requireValidCsrfToken('../../dashboard.php');
+
 $publicationId = (int) ($_POST['publication_id'] ?? 0);
 $newStatus = $_POST['publication_status'] ?? '';
 
