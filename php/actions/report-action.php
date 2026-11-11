@@ -18,6 +18,16 @@ if (!in_array($targetType, ['usuario', 'publicacion'], true)) {
     redirectTo('../../index.php');
 }
 
+// Flujo 03: solo se aceptan reportes sobre usuarios o publicaciones que existan.
+$targetExists = $targetType === 'publicacion'
+    ? (bool) (new Publication())->findById($targetId)
+    : (bool) (new User())->findById($targetId);
+
+if ($targetId <= 0 || !$targetExists) {
+    flashMessage('error', 'El usuario o la publicacion que intentas reportar no existe.');
+    redirectTo('../../index.php');
+}
+
 // Las actions viven en php/actions/, por eso la ruta de regreso sube dos niveles.
 $returnPath = $targetType === 'publicacion'
     ? '../../product.php?id=' . $targetId
