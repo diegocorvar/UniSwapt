@@ -28,7 +28,11 @@ if (!empty($_FILES['profile_photo']['name'])) {
         redirectTo('../../profile.php');
     }
 
-    if (!in_array($file['type'], ALLOWED_PROFILE_PHOTO_MIME_TYPES, true)) {
+    // HU-04: el tipo se comprueba leyendo el archivo en el servidor (finfo_file),
+    // no con $file['type'], que es un dato controlado por el cliente.
+    $mimeType = detectUploadedMimeType((string) $file['tmp_name']);
+
+    if ($mimeType === null || !in_array($mimeType, ALLOWED_PROFILE_PHOTO_MIME_TYPES, true)) {
         flashMessage('error', 'La foto de perfil debe ser JPG o PNG.');
         redirectTo('../../profile.php');
     }
@@ -42,9 +46,13 @@ if (!empty($_FILES['profile_photo']['name'])) {
         mkdir(UPLOAD_DIR_PROFILES, 0755, true);
     }
 
-    $extension = $file['type'] === 'image/png' ? 'png' : 'jpg';
+    $extension = extensionForImageMime($mimeType);
     $profilePhotoPath = 'perfil_' . currentUserId() . '_' . time() . '.' . $extension;
-    move_uploaded_file($file['tmp_name'], UPLOAD_DIR_PROFILES . $profilePhotoPath);
+
+    if (!move_uploaded_file($file['tmp_name'], UPLOAD_DIR_PROFILES . $profilePhotoPath)) {
+        flashMessage('error', 'No fue posible guardar la foto de perfil.');
+        redirectTo('../../profile.php');
+    }
 }
 
 $userModel->updateProfile(currentUserId(), $career, $semester, $profilePhotoPath);

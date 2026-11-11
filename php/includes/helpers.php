@@ -25,6 +25,42 @@ function isInstitutionalEmail(string $email): bool
     return str_ends_with(strtolower(trim($email)), strtolower(INSTITUTIONAL_EMAIL_DOMAIN));
 }
 
+/**
+ * Devuelve el tipo MIME real de un archivo subido, inspeccionando su contenido
+ * en el servidor. Nunca usa $_FILES[...]['type'], porque ese valor lo envia el
+ * cliente y puede falsificarse.
+ *
+ * Usa finfo_file(FILEINFO_MIME_TYPE) (extension "fileinfo"). Si la extension no
+ * esta habilitada en php.ini, recurre a getimagesize(), que tambien lee los
+ * bytes del archivo, para no aceptar nunca un tipo declarado por el cliente.
+ */
+function detectUploadedMimeType(string $tmpPath): ?string
+{
+    if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+        return null;
+    }
+
+    if (function_exists('finfo_open')) {
+        $fileInfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = $fileInfo ? finfo_file($fileInfo, $tmpPath) : false;
+        return is_string($mimeType) ? $mimeType : null;
+    }
+
+    $imageInfo = @getimagesize($tmpPath);
+    return is_array($imageInfo) && isset($imageInfo['mime']) ? $imageInfo['mime'] : null;
+}
+
+/** Extension de archivo segura derivada del MIME real (no del nombre original). */
+function extensionForImageMime(string $mimeType): ?string
+{
+    return match ($mimeType) {
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+        default      => null,
+    };
+}
+
 function formatPrice(float $price): string
 {
     return '$' . number_format($price, 2);
