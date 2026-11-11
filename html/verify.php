@@ -8,8 +8,8 @@
         <?php else: ?>
             <span class="pin"></span>
             <h1>Enlace expirado o invalido</h1>
-            <p class="text-muted">Este enlace de verificacion ya caduco o fue alterado. Puedes solicitar uno nuevo registrandote de nuevo o contactando a soporte.</p>
-            <a href="register.php" class="btn btn-secondary btn-block">Volver a registro</a>
+            <p class="text-muted">Este enlace de verificacion ya caduco o fue alterado. Solicita uno nuevo con tu correo institucional.</p>
+            <a href="resend-verification.php" class="btn btn-primary btn-block">Reenviar correo de verificacion</a>
         <?php endif; ?>
     </div>
 </div>

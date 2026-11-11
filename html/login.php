@@ -20,6 +20,7 @@
         </form>
 
         <p class="auth-footer-link"><a href="forgot-password.php">¿Olvidaste tu contrasena?</a></p>
+        <p class="auth-footer-link"><a href="resend-verification.php">¿No recibiste el correo de verificacion?</a></p>
         <p class="auth-footer-link">¿Aun no tienes cuenta? <a href="register.php">Registrate</a></p>
     </div>
 </div>

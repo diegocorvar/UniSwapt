@@ -21,7 +21,7 @@ $userModel = new User();
 $result = $userModel->attemptLogin($email, $password);
 
 if (!$result['success'] && $result['reason'] === 'cuenta_no_verificada') {
-    flashMessage('error', 'Tu cuenta aun no ha sido verificada. Revisa tu correo institucional para activarla.');
+    flashMessage('error', 'Tu cuenta aun no ha sido verificada. Revisa tu correo institucional o solicita un nuevo enlace en "¿No recibiste el correo de verificacion?".');
     redirectTo('../../login.php');
 }
 
