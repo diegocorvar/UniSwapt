@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../publish.php');
 }
 
+requireValidCsrfToken('../../publish.php');
+
 $title = trim($_POST['title'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $itemCondition = $_POST['item_condition'] ?? '';
@@ -35,7 +37,8 @@ if (!in_array($careerCategory, ACADEMIC_CAREERS, true) || !in_array($materialCat
 }
 
 $uploadedImages = $_FILES['images'] ?? null;
-$imageCount = $uploadedImages ? count(array_filter($uploadedImages['name'])) : 0;
+$hasImageArray = is_array($uploadedImages) && is_array($uploadedImages['name'] ?? null);
+$imageCount = $hasImageArray ? count(array_filter($uploadedImages['name'], fn ($name) => $name !== '')) : 0;
 
 // HU-07, Escenario 2: entre 1 y 5 imagenes.
 if ($imageCount < 1) {
@@ -43,6 +46,34 @@ if ($imageCount < 1) {
 }
 if ($imageCount > MAX_IMAGES_PER_PUBLICATION) {
     $errors[] = 'Solo se permite un maximo de ' . MAX_IMAGES_PER_PUBLICATION . ' imagenes por publicacion.';
+}
+
+// HU-07 / RF-08: el tipo se verifica en el servidor leyendo el contenido real
+// del archivo (finfo_file), nunca con $_FILES[...]['type'], que manda el cliente.
+$validImages = [];
+if (empty($errors)) {
+    foreach ($uploadedImages['name'] as $index => $originalName) {
+        if ($originalName === '') {
+            continue;
+        }
+
+        $tmpPath = (string) ($uploadedImages['tmp_name'][$index] ?? '');
+        $mimeType = ($uploadedImages['error'][$index] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK
+            ? detectUploadedMimeType($tmpPath)
+            : null;
+        $size = (int) ($uploadedImages['size'][$index] ?? 0);
+
+        if ($mimeType === null || !in_array($mimeType, ALLOWED_IMAGE_MIME_TYPES, true)) {
+            $errors[] = 'La imagen "' . basename((string) $originalName) . '" no es un JPG, PNG o WebP valido.';
+            continue;
+        }
+        if ($size > MAX_IMAGE_SIZE_BYTES) {
+            $errors[] = 'La imagen "' . basename((string) $originalName) . '" supera el limite de 5MB.';
+            continue;
+        }
+
+        $validImages[] = ['tmp_path' => $tmpPath, 'extension' => extensionForImageMime($mimeType)];
+    }
 }
 
 if (!empty($errors)) {
@@ -67,22 +98,11 @@ if (!is_dir(UPLOAD_DIR_PRODUCTS)) {
 }
 
 $imagesSaved = 0;
-foreach ($uploadedImages['name'] as $index => $originalName) {
-    if ($originalName === '' || $imagesSaved >= MAX_IMAGES_PER_PUBLICATION) {
+foreach ($validImages as $image) {
+    $fileName = 'pub_' . $publicationId . '_' . $imagesSaved . '_' . time() . '.' . $image['extension'];
+    if (!move_uploaded_file($image['tmp_path'], UPLOAD_DIR_PRODUCTS . $fileName)) {
         continue;
     }
-
-    $mimeType = $uploadedImages['type'][$index];
-    $tmpPath = $uploadedImages['tmp_name'][$index];
-    $size = $uploadedImages['size'][$index];
-
-    if (!in_array($mimeType, ALLOWED_IMAGE_MIME_TYPES, true) || $size > MAX_IMAGE_SIZE_BYTES) {
-        continue; // Se ignoran archivos invalidos; la validacion de JS ya evita esto en el flujo normal.
-    }
-
-    $extensionMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $fileName = 'pub_' . $publicationId . '_' . $imagesSaved . '_' . time() . '.' . $extensionMap[$mimeType];
-    move_uploaded_file($tmpPath, UPLOAD_DIR_PRODUCTS . $fileName);
 
     $publicationModel->addImage($publicationId, $fileName, $imagesSaved === 0);
     $imagesSaved++;

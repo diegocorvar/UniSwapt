@@ -15,3 +15,12 @@ spl_autoload_register(function (string $className): void {
         require_once $path;
     }
 });
+
+// Flujo 02: el prototipo no tiene tareas programadas (cron), asi que las reservas
+// vencidas (RESERVATION_EXPIRATION_HOURS) se liberan al inicio de cada peticion,
+// antes de que cualquier pagina o action lea el estado de las publicaciones.
+try {
+    (new Transaction())->releaseExpiredReservations();
+} catch (Throwable $exception) {
+    error_log('UniSwapt: no se pudieron liberar las reservas vencidas: ' . $exception->getMessage());
+}

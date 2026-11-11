@@ -121,7 +121,8 @@ class Publication
     public function findById(int $id): array|false
     {
         $stmt = $this->db->prepare(
-            'SELECT p.*, u.full_name AS seller_name, u.whatsapp_phone, u.reputation_avg, u.reputation_count
+            'SELECT p.*, u.full_name AS seller_name, u.profile_photo AS seller_photo,
+                    u.whatsapp_phone, u.reputation_avg, u.reputation_count
              FROM publications p JOIN users u ON u.id = p.user_id WHERE p.id = :id'
         );
         $stmt->execute(['id' => $id]);
@@ -151,16 +152,32 @@ class Publication
         return $stmt->rowCount() > 0;
     }
 
-    public function markAsReserved(int $publicationId): void
+    /** Reserva la publicacion solo si sigue "Disponible"; devuelve false si no. */
+    public function markAsReserved(int $publicationId): bool
     {
-        $stmt = $this->db->prepare("UPDATE publications SET publication_status = 'En Proceso de Entrega' WHERE id = :id");
+        $stmt = $this->db->prepare(
+            "UPDATE publications SET publication_status = 'En Proceso de Entrega'
+             WHERE id = :id AND publication_status = 'Disponible'"
+        );
         $stmt->execute(['id' => $publicationId]);
+        return $stmt->rowCount() > 0;
     }
 
     public function markAsAvailable(int $publicationId): void
     {
         $stmt = $this->db->prepare("UPDATE publications SET publication_status = 'Disponible' WHERE id = :id");
         $stmt->execute(['id' => $publicationId]);
+    }
+
+    /** Flujo 02: libera una reserva vencida sin pisar estados cerrados o inactivos. */
+    public function releaseReservation(int $publicationId): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE publications SET publication_status = 'Disponible'
+             WHERE id = :id AND publication_status = 'En Proceso de Entrega'"
+        );
+        $stmt->execute(['id' => $publicationId]);
+        return $stmt->rowCount() > 0;
     }
 
     public function markAsClosed(int $publicationId, string $modality): void

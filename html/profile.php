@@ -19,6 +19,7 @@
     <div class="card form-card" style="max-width:520px; margin-bottom: var(--space-7);">
         <h2>Editar perfil</h2>
         <form method="post" action="php/actions/update-profile-action.php" enctype="multipart/form-data">
+            <?= csrfField() ?>
             <div class="field-group">
                 <label class="field-label" for="career">Carrera</label>
                 <select class="field-select" id="career" name="career" required>
@@ -46,6 +47,7 @@
     <details style="margin-bottom: var(--space-6);">
         <summary class="text-muted" style="cursor:pointer;">Reportar a este usuario</summary>
         <form method="post" action="php/actions/report-action.php" class="card" style="max-width:480px; margin-top: var(--space-3);">
+            <?= csrfField() ?>
             <input type="hidden" name="target_type" value="usuario">
             <input type="hidden" name="target_id" value="<?= (int) $profileUser['id'] ?>">
             <div class="field-group">

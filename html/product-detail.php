@@ -45,7 +45,12 @@ $statusBadgeClass = match ($publication['publication_status']) {
         <?php endif; ?>
 
         <div class="seller-card" style="margin: var(--space-5) 0;">
-            <img class="avatar-chip" style="width:44px;height:44px;" src="assets/images/default-avatar.svg" alt="">
+            <?php
+                $sellerAvatar = !empty($publication['seller_photo'])
+                    ? UPLOAD_URL_PROFILES . $publication['seller_photo']
+                    : 'assets/images/default-avatar.svg';
+            ?>
+            <img class="avatar-chip" style="width:44px;height:44px;" src="<?= sanitizeText($sellerAvatar) ?>" alt="Foto de <?= sanitizeText($publication['seller_name']) ?>">
             <div>
                 <strong><a href="profile.php?id=<?= (int) $publication['user_id'] ?>"><?= sanitizeText($publication['seller_name']) ?></a></strong>
                 <div>
@@ -63,6 +68,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
             <div class="card" style="background: var(--color-surface-alt);">
                 <h3>Gestionar publicacion</h3>
                 <form method="post" action="php/actions/update-status-action.php" class="field-row" style="align-items:end;">
+                    <?= csrfField() ?>
                     <input type="hidden" name="publication_id" value="<?= (int) $publication['id'] ?>">
                     <div class="field-group" style="margin:0; flex:2;">
                         <label class="field-label" for="publication_status">Estado</label>
@@ -76,8 +82,14 @@ $statusBadgeClass = match ($publication['publication_status']) {
                 </form>
             </div>
         <?php elseif (isLoggedIn()): ?>
-            <?php if ($publication['publication_status'] === 'Disponible'): ?>
+            <?php if ($hasActiveProposal): ?>
+                <div class="card text-muted" style="margin-bottom: var(--space-4);">
+                    Ya enviaste una propuesta para esta publicacion. Puedes darle seguimiento en
+                    <a href="dashboard.php?tab=transacciones">Mi panel</a>.
+                </div>
+            <?php elseif ($publication['publication_status'] === 'Disponible'): ?>
                 <form method="post" action="php/actions/propose-transaction-action.php" class="card" style="margin-bottom: var(--space-4);">
+                    <?= csrfField() ?>
                     <input type="hidden" name="publication_id" value="<?= (int) $publication['id'] ?>">
                     <h3>Enviar propuesta</h3>
                     <?php if ($publication['modality'] === 'Venta'): ?>
@@ -102,6 +114,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
             <details>
                 <summary class="text-muted" style="cursor:pointer;">Reportar esta publicacion</summary>
                 <form method="post" action="php/actions/report-action.php" style="margin-top: var(--space-3);">
+                    <?= csrfField() ?>
                     <input type="hidden" name="target_type" value="publicacion">
                     <input type="hidden" name="target_id" value="<?= (int) $publication['id'] ?>">
                     <div class="field-group">

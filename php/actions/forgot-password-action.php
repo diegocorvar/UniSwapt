@@ -5,7 +5,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../forgot-password.php');
 }
 
+requireValidCsrfToken('../../forgot-password.php');
+
 $email = trim($_POST['email'] ?? '');
+
+if (!isValidEmailFormat($email)) {
+    flashMessage('error', 'Ingresa un correo electronico con formato valido.');
+    redirectTo('../../forgot-password.php');
+}
+
 $userModel = new User();
 $user = $userModel->findByEmail($email);
 

@@ -7,6 +7,7 @@
         </div>
 
         <form method="post" action="php/actions/login-action.php">
+            <?= csrfField() ?>
             <div class="field-group">
                 <label class="field-label" for="email">Correo institucional</label>
                 <input class="field-input" type="email" id="email" name="email" required autofocus>
@@ -19,6 +20,7 @@
         </form>
 
         <p class="auth-footer-link"><a href="forgot-password.php">¿Olvidaste tu contrasena?</a></p>
+        <p class="auth-footer-link"><a href="resend-verification.php">¿No recibiste el correo de verificacion?</a></p>
         <p class="auth-footer-link">¿Aun no tienes cuenta? <a href="register.php">Registrate</a></p>
     </div>
 </div>

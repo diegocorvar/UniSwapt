@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../index.php');
 }
 
+requireValidCsrfToken('../../index.php');
+
 $publicationId = (int) ($_POST['publication_id'] ?? 0);
 $offerAmount = isset($_POST['offer_amount']) && $_POST['offer_amount'] !== '' ? (float) $_POST['offer_amount'] : null;
 
@@ -23,6 +25,12 @@ if ((int) $publication['user_id'] === currentUserId()) {
 }
 
 $transactionModel = new Transaction();
+
+if ($transactionModel->hasActiveProposal($publicationId, currentUserId())) {
+    flashMessage('info', 'Ya enviaste una propuesta para esta publicacion. Espera la respuesta del vendedor/donante.');
+    redirectTo('../../product.php?id=' . $publicationId);
+}
+
 $transactionModel->createProposal(
     $publicationId,
     currentUserId(),

@@ -5,14 +5,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../login.php');
 }
 
+requireValidCsrfToken('../../login.php');
+
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
+
+// Un correo mal formado no puede existir en la base de datos: se responde con el
+// mismo mensaje generico para no dar pistas (HU-03, Escenario 2).
+if (!isValidEmailFormat($email)) {
+    flashMessage('error', 'Credenciales incorrectas. Verifica tu informacion.');
+    redirectTo('../../login.php');
+}
 
 $userModel = new User();
 $result = $userModel->attemptLogin($email, $password);
 
 if (!$result['success'] && $result['reason'] === 'cuenta_no_verificada') {
-    flashMessage('error', 'Tu cuenta aun no ha sido verificada. Revisa tu correo institucional para activarla.');
+    flashMessage('error', 'Tu cuenta aun no ha sido verificada. Revisa tu correo institucional o solicita un nuevo enlace en "¿No recibiste el correo de verificacion?".');
     redirectTo('../../login.php');
 }
 
@@ -23,6 +32,7 @@ if (!$result['success']) {
 }
 
 session_regenerate_id(true);
+rotateCsrfToken();
 $_SESSION['user_id'] = (int) $result['user']['id'];
 $_SESSION['user_name'] = $result['user']['full_name'];
 

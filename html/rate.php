@@ -6,6 +6,7 @@
     </div>
 
     <form method="post" action="php/actions/rate-action.php">
+        <?= csrfField() ?>
         <input type="hidden" name="transaction_id" value="<?= (int) $transaction['id'] ?>">
 
         <div class="field-group">

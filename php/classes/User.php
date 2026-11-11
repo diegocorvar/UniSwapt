@@ -69,6 +69,15 @@ class User
         return $stmt->fetch();
     }
 
+    /** Marca como usados todos los tokens vigentes de un tipo (p. ej. al reenviar). */
+    public function invalidateTokens(int $userId, string $type): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE tokens SET used = 1 WHERE user_id = :user_id AND token_type = :type AND used = 0'
+        );
+        $stmt->execute(['user_id' => $userId, 'type' => $type]);
+    }
+
     public function markTokenAsUsed(int $tokenId): void
     {
         $stmt = $this->db->prepare('UPDATE tokens SET used = 1 WHERE id = :id');

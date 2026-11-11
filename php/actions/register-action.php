@@ -5,6 +5,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirectTo('../../register.php');
 }
 
+requireValidCsrfToken('../../register.php');
+
 $fullName = trim($_POST['full_name'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
@@ -12,6 +14,11 @@ $passwordConfirm = $_POST['password_confirm'] ?? '';
 
 if ($fullName === '' || $email === '' || $password === '') {
     flashMessage('error', 'Completa todos los campos para registrarte.');
+    redirectTo('../../register.php');
+}
+
+if (!isValidEmailFormat($email)) {
+    flashMessage('error', 'El formato del correo electronico no es valido.');
     redirectTo('../../register.php');
 }
 

@@ -10,6 +10,7 @@
             <p class="auth-footer-link"><a href="forgot-password.php">Solicitar nuevo enlace</a></p>
         <?php else: ?>
             <form method="post" action="php/actions/reset-password-action.php">
+                <?= csrfField() ?>
                 <input type="hidden" name="token" value="<?= sanitizeText($token) ?>">
                 <div class="field-group">
                     <label class="field-label" for="password">Nueva contrasena</label>
