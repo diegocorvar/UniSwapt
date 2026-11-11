@@ -45,7 +45,12 @@ $statusBadgeClass = match ($publication['publication_status']) {
         <?php endif; ?>
 
         <div class="seller-card" style="margin: var(--space-5) 0;">
-            <img class="avatar-chip" style="width:44px;height:44px;" src="assets/images/default-avatar.svg" alt="">
+            <?php
+                $sellerAvatar = !empty($publication['seller_photo'])
+                    ? UPLOAD_URL_PROFILES . $publication['seller_photo']
+                    : 'assets/images/default-avatar.svg';
+            ?>
+            <img class="avatar-chip" style="width:44px;height:44px;" src="<?= sanitizeText($sellerAvatar) ?>" alt="Foto de <?= sanitizeText($publication['seller_name']) ?>">
             <div>
                 <strong><a href="profile.php?id=<?= (int) $publication['user_id'] ?>"><?= sanitizeText($publication['seller_name']) ?></a></strong>
                 <div>

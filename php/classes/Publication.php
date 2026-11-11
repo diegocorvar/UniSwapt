@@ -121,7 +121,8 @@ class Publication
     public function findById(int $id): array|false
     {
         $stmt = $this->db->prepare(
-            'SELECT p.*, u.full_name AS seller_name, u.whatsapp_phone, u.reputation_avg, u.reputation_count
+            'SELECT p.*, u.full_name AS seller_name, u.profile_photo AS seller_photo,
+                    u.whatsapp_phone, u.reputation_avg, u.reputation_count
              FROM publications p JOIN users u ON u.id = p.user_id WHERE p.id = :id'
         );
         $stmt->execute(['id' => $id]);
