@@ -1,0 +1,21 @@
+# Base de datos SQLite local: se genera automaticamente a partir de database/schema.sql
+database/*.sqlite
+database/*.sqlite-journal
+database/*.sqlite-wal
+database/*.sqlite-shm
+
+# Imagenes subidas por los usuarios (se conserva la estructura con .gitkeep)
+assets/uploads/**
+!assets/uploads/**/
+!assets/uploads/**/.gitkeep
+
+# Bandeja de correo simulada (Flujo 04)
+html/emails/*
+!html/emails/.gitkeep
+
+# Archivos de sistema y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
