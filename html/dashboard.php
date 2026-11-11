@@ -110,6 +110,13 @@ function statusBadgeFor(string $status): string
                         <?php endif; ?>
 
                     <?php if ($transaction['transaction_status'] === 'Aceptada'): ?>
+                        <?php $reservationDeadline = Transaction::reservationDeadline($transaction); ?>
+                        <?php if ($reservationDeadline): ?>
+                            <p class="text-muted" style="margin: var(--space-2) 0 0;">
+                                Si la entrega no se confirma, la reserva se liberara automaticamente el
+                                <?= sanitizeText($reservationDeadline->format('d/m/Y H:i')) ?>.
+                            </p>
+                        <?php endif; ?>
                         <form method="post" action="php/actions/update-delivery-coordination-action.php" class="card" style="margin: var(--space-3) 0 0; padding: var(--space-3);">
                             <?= csrfField() ?>
                             <input type="hidden" name="transaction_id" value="<?= (int) $transaction['id'] ?>">

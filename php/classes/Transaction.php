@@ -55,10 +55,10 @@ class Transaction
     public function accept(int $transactionId): bool
     {
         $stmt = $this->db->prepare(
-            "UPDATE transactions SET transaction_status = 'Aceptada'
+            "UPDATE transactions SET transaction_status = 'Aceptada', accepted_at = :accepted_at
              WHERE id = :id AND transaction_status = 'Propuesta'"
         );
-        $stmt->execute(['id' => $transactionId]);
+        $stmt->execute(['id' => $transactionId, 'accepted_at' => date('Y-m-d H:i:s')]);
         return $stmt->rowCount() > 0;
     }
 
@@ -204,6 +204,81 @@ class Transaction
         );
         $stmt->execute(['pub_id' => $publicationId]);
         return (bool) $stmt->fetchColumn();
+    }
+
+    /**
+     * Flujo 02: fecha a partir de la cual una reserva sin confirmar se libera.
+     * Se cuenta RESERVATION_EXPIRATION_HOURS desde la aceptacion o, si ya hay un
+     * encuentro coordinado, desde la fecha acordada para ese encuentro.
+     */
+    public static function reservationDeadline(array $transaction): ?DateTimeImmutable
+    {
+        if (($transaction['transaction_status'] ?? '') !== 'Aceptada') {
+            return null;
+        }
+
+        $reference = ($transaction['coordination_status'] ?? '') === 'Coordinada' && !empty($transaction['meeting_at'])
+            ? $transaction['meeting_at']
+            : ($transaction['accepted_at'] ?? null);
+
+        if (empty($reference)) {
+            return null;
+        }
+
+        return (new DateTimeImmutable($reference))->modify('+' . RESERVATION_EXPIRATION_HOURS . ' hours');
+    }
+
+    /**
+     * Flujo 02: cancela las transacciones "Aceptada" cuya reserva vencio y
+     * regresa sus publicaciones a "Disponible". Devuelve cuantas se liberaron.
+     */
+    public function releaseExpiredReservations(): int
+    {
+        $cutoff = (new DateTimeImmutable())
+            ->modify('-' . RESERVATION_EXPIRATION_HOURS . ' hours')
+            ->format('Y-m-d H:i:s');
+
+        $stmt = $this->db->prepare(
+            "SELECT id, publication_id FROM transactions
+             WHERE transaction_status = 'Aceptada'
+               AND accepted_at IS NOT NULL
+               AND datetime(CASE
+                       WHEN coordination_status = 'Coordinada' AND meeting_at IS NOT NULL THEN meeting_at
+                       ELSE accepted_at
+                   END) <= datetime(:cutoff)"
+        );
+        $stmt->execute(['cutoff' => $cutoff]);
+        $expired = $stmt->fetchAll();
+
+        if (empty($expired)) {
+            return 0;
+        }
+
+        $publicationModel = new Publication();
+        $cancel = $this->db->prepare(
+            "UPDATE transactions
+             SET transaction_status = 'Cancelada', coordination_status = 'Cancelada'
+             WHERE id = :id AND transaction_status = 'Aceptada'"
+        );
+
+        $released = 0;
+        $this->db->beginTransaction();
+        try {
+            foreach ($expired as $row) {
+                $cancel->execute(['id' => $row['id']]);
+                if ($cancel->rowCount() === 0) {
+                    continue; // Otra peticion ya la cerro o cancelo.
+                }
+                $publicationModel->releaseReservation((int) $row['publication_id']);
+                $released++;
+            }
+            $this->db->commit();
+        } catch (Throwable $exception) {
+            $this->db->rollBack();
+            throw $exception;
+        }
+
+        return $released;
     }
 
     public function findById(int $id): array|false

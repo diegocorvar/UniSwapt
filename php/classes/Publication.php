@@ -169,6 +169,17 @@ class Publication
         $stmt->execute(['id' => $publicationId]);
     }
 
+    /** Flujo 02: libera una reserva vencida sin pisar estados cerrados o inactivos. */
+    public function releaseReservation(int $publicationId): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE publications SET publication_status = 'Disponible'
+             WHERE id = :id AND publication_status = 'En Proceso de Entrega'"
+        );
+        $stmt->execute(['id' => $publicationId]);
+        return $stmt->rowCount() > 0;
+    }
+
     public function markAsClosed(int $publicationId, string $modality): void
     {
         $finalStatus = $modality === 'Donacion' ? 'Donado' : 'Vendido/Intercambiado';
