@@ -17,6 +17,11 @@ if ($fullName === '' || $email === '' || $password === '') {
     redirectTo('../../register.php');
 }
 
+if (!isValidEmailFormat($email)) {
+    flashMessage('error', 'El formato del correo electronico no es valido.');
+    redirectTo('../../register.php');
+}
+
 // HU-01, Escenario 2: solo se permite el dominio institucional.
 if (!isInstitutionalEmail($email)) {
     flashMessage('error', 'Dominio no permitido. Debes utilizar un correo institucional valido.');

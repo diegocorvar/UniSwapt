@@ -20,9 +20,17 @@ function generateSecureToken(): string
     return bin2hex(random_bytes(32));
 }
 
+/** Valida la sintaxis del correo en el servidor (RFC 5322 simplificado de PHP). */
+function isValidEmailFormat(string $email): bool
+{
+    return filter_var(trim($email), FILTER_VALIDATE_EMAIL) !== false;
+}
+
+/** RF-01: correo con formato valido y que termina en el dominio institucional. */
 function isInstitutionalEmail(string $email): bool
 {
-    return str_ends_with(strtolower(trim($email)), strtolower(INSTITUTIONAL_EMAIL_DOMAIN));
+    return isValidEmailFormat($email)
+        && str_ends_with(strtolower(trim($email)), strtolower(INSTITUTIONAL_EMAIL_DOMAIN));
 }
 
 /**

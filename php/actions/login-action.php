@@ -10,6 +10,13 @@ requireValidCsrfToken('../../login.php');
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 
+// Un correo mal formado no puede existir en la base de datos: se responde con el
+// mismo mensaje generico para no dar pistas (HU-03, Escenario 2).
+if (!isValidEmailFormat($email)) {
+    flashMessage('error', 'Credenciales incorrectas. Verifica tu informacion.');
+    redirectTo('../../login.php');
+}
+
 $userModel = new User();
 $result = $userModel->attemptLogin($email, $password);
 
