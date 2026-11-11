@@ -32,18 +32,43 @@ class Transaction
         return (int) $this->db->lastInsertId();
     }
 
-    /** Flujo 01, paso 4-5: el vendedor acepta y el articulo pasa a "En Proceso". */
-    public function accept(int $transactionId): void
+    /**
+     * Flujo 01, paso 4-5: el vendedor acepta y el articulo pasa a "En Proceso".
+     * Solo cambia transacciones que siguen en "Propuesta"; devuelve false si no.
+     */
+    public function accept(int $transactionId): bool
     {
-        $stmt = $this->db->prepare("UPDATE transactions SET transaction_status = 'Aceptada' WHERE id = :id");
+        $stmt = $this->db->prepare(
+            "UPDATE transactions SET transaction_status = 'Aceptada'
+             WHERE id = :id AND transaction_status = 'Propuesta'"
+        );
         $stmt->execute(['id' => $transactionId]);
+        return $stmt->rowCount() > 0;
     }
 
     /** Flujo 01, alterno A1: el vendedor rechaza y la publicacion sigue disponible. */
-    public function reject(int $transactionId): void
+    public function reject(int $transactionId): bool
     {
-        $stmt = $this->db->prepare("UPDATE transactions SET transaction_status = 'Rechazada' WHERE id = :id");
+        $stmt = $this->db->prepare(
+            "UPDATE transactions SET transaction_status = 'Rechazada'
+             WHERE id = :id AND transaction_status = 'Propuesta'"
+        );
         $stmt->execute(['id' => $transactionId]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Al aceptar una propuesta, el resto de propuestas pendientes de la misma
+     * publicacion se rechazan automaticamente. Devuelve cuantas se rechazaron.
+     */
+    public function rejectOtherPendingProposals(int $publicationId, int $acceptedTransactionId): int
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE transactions SET transaction_status = 'Rechazada'
+             WHERE publication_id = :pub_id AND id <> :accepted_id AND transaction_status = 'Propuesta'"
+        );
+        $stmt->execute(['pub_id' => $publicationId, 'accepted_id' => $acceptedTransactionId]);
+        return $stmt->rowCount();
     }
 
     /** Flujo 02, excepcion E2: cualquiera de las partes cancela. */

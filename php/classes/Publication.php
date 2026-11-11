@@ -151,10 +151,15 @@ class Publication
         return $stmt->rowCount() > 0;
     }
 
-    public function markAsReserved(int $publicationId): void
+    /** Reserva la publicacion solo si sigue "Disponible"; devuelve false si no. */
+    public function markAsReserved(int $publicationId): bool
     {
-        $stmt = $this->db->prepare("UPDATE publications SET publication_status = 'En Proceso de Entrega' WHERE id = :id");
+        $stmt = $this->db->prepare(
+            "UPDATE publications SET publication_status = 'En Proceso de Entrega'
+             WHERE id = :id AND publication_status = 'Disponible'"
+        );
         $stmt->execute(['id' => $publicationId]);
+        return $stmt->rowCount() > 0;
     }
 
     public function markAsAvailable(int $publicationId): void
