@@ -77,7 +77,12 @@ $statusBadgeClass = match ($publication['publication_status']) {
                 </form>
             </div>
         <?php elseif (isLoggedIn()): ?>
-            <?php if ($publication['publication_status'] === 'Disponible'): ?>
+            <?php if ($hasActiveProposal): ?>
+                <div class="card text-muted" style="margin-bottom: var(--space-4);">
+                    Ya enviaste una propuesta para esta publicacion. Puedes darle seguimiento en
+                    <a href="dashboard.php?tab=transacciones">Mi panel</a>.
+                </div>
+            <?php elseif ($publication['publication_status'] === 'Disponible'): ?>
                 <form method="post" action="php/actions/propose-transaction-action.php" class="card" style="margin-bottom: var(--space-4);">
                     <?= csrfField() ?>
                     <input type="hidden" name="publication_id" value="<?= (int) $publication['id'] ?>">

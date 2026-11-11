@@ -33,6 +33,22 @@ class Transaction
     }
 
     /**
+     * Flujo 01: un comprador solo puede tener una propuesta activa (pendiente o
+     * aceptada) por publicacion.
+     */
+    public function hasActiveProposal(int $publicationId, int $buyerId): bool
+    {
+        $stmt = $this->db->prepare(
+            "SELECT 1 FROM transactions
+             WHERE publication_id = :pub_id AND buyer_id = :buyer_id
+               AND transaction_status IN ('Propuesta', 'Aceptada')
+             LIMIT 1"
+        );
+        $stmt->execute(['pub_id' => $publicationId, 'buyer_id' => $buyerId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    /**
      * Flujo 01, paso 4-5: el vendedor acepta y el articulo pasa a "En Proceso".
      * Solo cambia transacciones que siguen en "Propuesta"; devuelve false si no.
      */

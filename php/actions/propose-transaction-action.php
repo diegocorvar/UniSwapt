@@ -25,6 +25,12 @@ if ((int) $publication['user_id'] === currentUserId()) {
 }
 
 $transactionModel = new Transaction();
+
+if ($transactionModel->hasActiveProposal($publicationId, currentUserId())) {
+    flashMessage('info', 'Ya enviaste una propuesta para esta publicacion. Espera la respuesta del vendedor/donante.');
+    redirectTo('../../product.php?id=' . $publicationId);
+}
+
 $transactionModel->createProposal(
     $publicationId,
     currentUserId(),

@@ -12,6 +12,8 @@ if (!$publication) {
 
 $images = $publicationModel->getImages($publicationId);
 $isOwner = isLoggedIn() && currentUserId() === (int) $publication['user_id'];
+$hasActiveProposal = isLoggedIn() && !$isOwner
+    && (new Transaction())->hasActiveProposal($publicationId, currentUserId());
 
 $pageTitle = $publication['title'];
 require __DIR__ . '/html/partials/header.php';
