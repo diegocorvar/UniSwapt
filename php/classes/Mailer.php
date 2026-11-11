@@ -77,7 +77,10 @@ class Mailer
     {
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
+        $basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+        // Los correos se envian desde php/actions/*-action.php; los enlaces deben
+        // apuntar a la raiz de la aplicacion (verify.php, reset-password.php...).
+        $basePath = rtrim(preg_replace('#/php/actions$#', '', $basePath), '/');
         return "{$scheme}://{$host}{$basePath}/{$relativePath}";
     }
 }
