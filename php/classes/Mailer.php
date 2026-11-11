@@ -14,13 +14,16 @@ class Mailer
 {
     public static function sendVerificationEmail(string $toEmail, string $fullName, string $token): string
     {
-        $verificationLink = self::buildAppUrl('verify.php?token=' . $token);
+        // Todo dato dinamico se escapa: el correo se guarda como HTML y se sirve
+        // desde el mismo origen, asi que un nombre como "<script>" seria un XSS almacenado.
+        $safeName = self::escape($fullName);
+        $verificationLink = self::escape(self::buildAppUrl('verify.php?token=' . rawurlencode($token)));
 
         $body = self::renderTemplate('Confirma tu cuenta en UniSwapt', "
-            <p>Hola, {$fullName}:</p>
+            <p>Hola, {$safeName}:</p>
             <p>Gracias por registrarte en UniSwapt con tu correo institucional.</p>
             <p>Confirma tu cuenta haciendo clic en el siguiente enlace (valido por " . VERIFICATION_TOKEN_TTL_HOURS . " horas):</p>
-            <p><a href='{$verificationLink}'>{$verificationLink}</a></p>
+            <p><a href=\"{$verificationLink}\">{$verificationLink}</a></p>
         ");
 
         return self::deliverToSimulatedInbox($toEmail, 'Confirma tu cuenta en UniSwapt', $body);
@@ -28,21 +31,30 @@ class Mailer
 
     public static function sendPasswordResetEmail(string $toEmail, string $fullName, string $token): string
     {
-        $resetLink = self::buildAppUrl('reset-password.php?token=' . $token);
+        $safeName = self::escape($fullName);
+        $resetLink = self::escape(self::buildAppUrl('reset-password.php?token=' . rawurlencode($token)));
 
         $body = self::renderTemplate('Restablece tu contrasena', "
-            <p>Hola, {$fullName}:</p>
+            <p>Hola, {$safeName}:</p>
             <p>Recibimos una solicitud para restablecer tu contrasena. Este enlace es valido por " . PASSWORD_RESET_TTL_HOURS . " hora(s):</p>
-            <p><a href='{$resetLink}'>{$resetLink}</a></p>
+            <p><a href=\"{$resetLink}\">{$resetLink}</a></p>
             <p>Si tu no solicitaste esto, ignora este mensaje.</p>
         ");
 
         return self::deliverToSimulatedInbox($toEmail, 'Restablece tu contrasena de UniSwapt', $body);
     }
 
+    /** Escapa texto para insertarlo en HTML o en atributos entre comillas. */
+    private static function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    /** $htmlBody ya debe venir con sus datos dinamicos escapados. */
     private static function renderTemplate(string $subject, string $htmlBody): string
     {
-        return "<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>{$subject}</title></head>"
+        $safeSubject = self::escape($subject);
+        return "<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>{$safeSubject}</title></head>"
             . "<body style='font-family: sans-serif; max-width:520px; margin:40px auto; color:#20242c;'>"
             . "<h2 style='color:#8a5a2b;'>UniSwapt</h2>{$htmlBody}"
             . "<hr><small>Correo generado por el prototipo local de UniSwapt.</small></body></html>";
