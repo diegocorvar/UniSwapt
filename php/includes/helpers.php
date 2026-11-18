@@ -20,6 +20,25 @@ function generateSecureToken(): string
     return bin2hex(random_bytes(32));
 }
 
+/**
+ * Lee una variable de entorno (Railway la expone por getenv(); algunos
+ * servidores PHP-FPM solo la copian a $_ENV o $_SERVER). Devuelve null si no
+ * existe o esta vacia.
+ */
+function envValue(string $name, ?string $default = null): ?string
+{
+    $value = getenv($name);
+    if ($value === false) {
+        $value = $_ENV[$name] ?? $_SERVER[$name] ?? null;
+    }
+
+    if (!is_string($value) || trim($value) === '') {
+        return $default;
+    }
+
+    return trim($value);
+}
+
 /** Valida la sintaxis del correo en el servidor (RFC 5322 simplificado de PHP). */
 function isValidEmailFormat(string $email): bool
 {

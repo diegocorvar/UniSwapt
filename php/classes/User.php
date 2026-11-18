@@ -26,19 +26,16 @@ class User
      */
     public function register(string $fullName, string $email, string $password): int
     {
-        $stmt = $this->db->prepare(
+        return Database::insertAndGetId(
             'INSERT INTO users (full_name, email, password_hash, account_status)
-             VALUES (:full_name, :email, :password_hash, :account_status)'
+             VALUES (:full_name, :email, :password_hash, :account_status)',
+            [
+                'full_name'      => $fullName,
+                'email'          => strtolower($email),
+                'password_hash'  => password_hash($password, PASSWORD_DEFAULT),
+                'account_status' => 'pendiente',
+            ]
         );
-
-        $stmt->execute([
-            'full_name'      => $fullName,
-            'email'          => strtolower($email),
-            'password_hash'  => password_hash($password, PASSWORD_DEFAULT),
-            'account_status' => 'pendiente',
-        ]);
-
-        return (int) $this->db->lastInsertId();
     }
 
     public function createToken(int $userId, string $type, int $ttlHours): string
@@ -63,9 +60,11 @@ class User
         $stmt = $this->db->prepare(
             "SELECT * FROM tokens
              WHERE token = :token AND token_type = :type AND used = 0
-             AND datetime(expires_at) >= datetime('now')"
+               AND expires_at >= :now"
         );
-        $stmt->execute(['token' => $token, 'type' => $type]);
+        // La hora de referencia sale de PHP, igual que expires_at (createToken), para
+        // que la comparacion no dependa de la zona horaria del motor (SQLite/PostgreSQL).
+        $stmt->execute(['token' => $token, 'type' => $type, 'now' => date('Y-m-d H:i:s')]);
         return $stmt->fetch();
     }
 

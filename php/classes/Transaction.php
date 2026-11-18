@@ -16,20 +16,18 @@ class Transaction
     /** Flujo 01, paso 1-2: el comprador envia una propuesta. */
     public function createProposal(int $publicationId, int $buyerId, int $sellerId, string $modality, ?float $offerAmount): int
     {
-        $stmt = $this->db->prepare(
+        return Database::insertAndGetId(
             'INSERT INTO transactions (publication_id, buyer_id, seller_id, modality, offer_amount, transaction_status)
-             VALUES (:pub_id, :buyer_id, :seller_id, :modality, :offer_amount, :status)'
-        );
-        $stmt->execute([
+             VALUES (:pub_id, :buyer_id, :seller_id, :modality, :offer_amount, :status)',
+            [
             'pub_id'       => $publicationId,
             'buyer_id'     => $buyerId,
             'seller_id'    => $sellerId,
             'modality'     => $modality,
             'offer_amount' => $offerAmount,
             'status'       => 'Propuesta',
-        ]);
-
-        return (int) $this->db->lastInsertId();
+            ]
+        );
     }
 
     /**
@@ -242,10 +240,10 @@ class Transaction
             "SELECT id, publication_id FROM transactions
              WHERE transaction_status = 'Aceptada'
                AND accepted_at IS NOT NULL
-               AND datetime(CASE
+               AND (CASE
                        WHEN coordination_status = 'Coordinada' AND meeting_at IS NOT NULL THEN meeting_at
                        ELSE accepted_at
-                   END) <= datetime(:cutoff)"
+                   END) <= :cutoff"
         );
         $stmt->execute(['cutoff' => $cutoff]);
         $expired = $stmt->fetchAll();
@@ -298,10 +296,10 @@ class Transaction
              JOIN publications p ON p.id = t.publication_id
              JOIN users buyer ON buyer.id = t.buyer_id
              JOIN users seller ON seller.id = t.seller_id
-             WHERE t.buyer_id = :user_id OR t.seller_id = :user_id
+             WHERE t.buyer_id = :buyer_user_id OR t.seller_id = :seller_user_id
              ORDER BY t.created_at DESC'
         );
-        $stmt->execute(['user_id' => $userId]);
+        $stmt->execute(['buyer_user_id' => $userId, 'seller_user_id' => $userId]);
         return $stmt->fetchAll();
     }
 }

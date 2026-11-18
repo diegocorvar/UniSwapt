@@ -20,16 +20,14 @@ class Publication
         $price = $isFreeModality ? 0 : (float) $data['price'];
         $tradeInterest = $data['modality'] === 'Trueque' ? $data['trade_interest'] : null;
 
-        $stmt = $this->db->prepare(
+        return Database::insertAndGetId(
             'INSERT INTO publications
                 (user_id, title, description, item_condition, modality, price, trade_interest,
                  career_category, material_category, publication_status)
              VALUES
                 (:user_id, :title, :description, :item_condition, :modality, :price, :trade_interest,
-                 :career_category, :material_category, :publication_status)'
-        );
-
-        $stmt->execute([
+                 :career_category, :material_category, :publication_status)',
+            [
             'user_id'            => $userId,
             'title'              => $data['title'],
             'description'        => $data['description'],
@@ -40,9 +38,8 @@ class Publication
             'career_category'    => $data['career_category'],
             'material_category'  => $data['material_category'],
             'publication_status' => 'Disponible',
-        ]);
-
-        return (int) $this->db->lastInsertId();
+            ]
+        );
     }
 
     /** HU-07: asocia una imagen a la publicacion; la primera se marca como portada. */
@@ -95,8 +92,12 @@ class Publication
         }
 
         if (!empty($filters['search_term'])) {
-            $conditions[] = '(p.title LIKE :search_term OR p.description LIKE :search_term)';
-            $params['search_term'] = '%' . $filters['search_term'] . '%';
+            // ILIKE en PostgreSQL / LIKE en SQLite: busqueda sin distinguir mayusculas.
+            $like = Database::caseInsensitiveLike();
+            $conditions[] = "(p.title {$like} :search_title OR p.description {$like} :search_description)";
+            $searchPattern = '%' . $filters['search_term'] . '%';
+            $params['search_title'] = $searchPattern;
+            $params['search_description'] = $searchPattern;
         }
 
         $whereClause = implode(' AND ', $conditions);
