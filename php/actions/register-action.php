@@ -8,7 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 requireValidCsrfToken('../../register.php');
 
 $fullName = trim($_POST['full_name'] ?? '');
-$email = trim($_POST['email'] ?? '');
+// El correo se guarda y se busca siempre normalizado (minusculas, sin espacios).
+$email = normalizeEmail((string) ($_POST['email'] ?? ''));
 $password = $_POST['password'] ?? '';
 $passwordConfirm = $_POST['password_confirm'] ?? '';
 
@@ -22,7 +23,8 @@ if (!isValidEmailFormat($email)) {
     redirectTo('../../register.php');
 }
 
-// HU-01, Escenario 2: solo se permite el dominio institucional.
+// HU-01, Escenario 2: solo se permite el dominio institucional exacto
+// (sin subdominios ni dominios parecidos).
 if (!isInstitutionalEmail($email)) {
     flashMessage('error', 'Dominio no permitido. Debes utilizar un correo institucional valido.');
     redirectTo('../../register.php');

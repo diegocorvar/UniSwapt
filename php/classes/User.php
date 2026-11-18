@@ -16,7 +16,7 @@ class User
     public function emailExists(string $email): bool
     {
         $stmt = $this->db->prepare('SELECT id FROM users WHERE email = :email');
-        $stmt->execute(['email' => strtolower($email)]);
+        $stmt->execute(['email' => normalizeEmail($email)]);
         return (bool) $stmt->fetch();
     }
 
@@ -31,7 +31,7 @@ class User
              VALUES (:full_name, :email, :password_hash, :account_status)',
             [
                 'full_name'      => $fullName,
-                'email'          => strtolower($email),
+                'email'          => normalizeEmail($email),
                 'password_hash'  => password_hash($password, PASSWORD_DEFAULT),
                 'account_status' => 'pendiente',
             ]
@@ -93,7 +93,7 @@ class User
     public function findByEmail(string $email): array|false
     {
         $stmt = $this->db->prepare('SELECT * FROM users WHERE email = :email');
-        $stmt->execute(['email' => strtolower($email)]);
+        $stmt->execute(['email' => normalizeEmail($email)]);
         return $stmt->fetch();
     }
 

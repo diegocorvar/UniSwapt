@@ -10,7 +10,8 @@
             <?= csrfField() ?>
             <div class="field-group">
                 <label class="field-label" for="email">Correo institucional</label>
-                <input class="field-input" type="email" id="email" name="email" required autofocus>
+                <input class="field-input" type="email" id="email" name="email" placeholder="nombre.apellido@itesa.edu.mx" <?= institutionalEmailInputAttributes() ?> required autofocus>
+                <p class="field-error" id="email-error"></p>
             </div>
             <div class="field-group">
                 <label class="field-label" for="password">Contrasena</label>
@@ -24,3 +25,5 @@
         <p class="auth-footer-link">¿Aun no tienes cuenta? <a href="register.php">Registrate</a></p>
     </div>
 </div>
+
+<script src="js/validation.js"></script>

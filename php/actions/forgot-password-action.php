@@ -7,10 +7,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 requireValidCsrfToken('../../forgot-password.php');
 
-$email = trim($_POST['email'] ?? '');
+$email = normalizeEmail((string) ($_POST['email'] ?? ''));
 
-if (!isValidEmailFormat($email)) {
-    flashMessage('error', 'Ingresa un correo electronico con formato valido.');
+// Todas las cuentas usan el dominio institucional; cualquier otro se rechaza aqui.
+if (!isInstitutionalEmail($email)) {
+    flashMessage('error', 'Ingresa tu correo institucional (' . INSTITUTIONAL_EMAIL_DOMAIN . ') con un formato valido.');
     redirectTo('../../forgot-password.php');
 }
 

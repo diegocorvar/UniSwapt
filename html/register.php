@@ -15,7 +15,7 @@
 
             <div class="field-group">
                 <label class="field-label" for="email">Correo institucional</label>
-                <input class="field-input" type="email" id="email" name="email" placeholder="nombre.apellido@itesa.edu.mx" required>
+                <input class="field-input" type="email" id="email" name="email" placeholder="nombre.apellido@itesa.edu.mx" <?= institutionalEmailInputAttributes() ?> required>
                 <p class="field-hint">Debe terminar en <?= sanitizeText(INSTITUTIONAL_EMAIL_DOMAIN) ?></p>
                 <p class="field-error" id="email-error"></p>
             </div>

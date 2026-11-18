@@ -39,17 +39,77 @@ function envValue(string $name, ?string $default = null): ?string
     return trim($value);
 }
 
+/** Forma canonica del correo: sin espacios y en minusculas (asi se guarda y se busca). */
+function normalizeEmail(string $email): string
+{
+    $email = trim($email);
+    return function_exists('mb_strtolower') ? mb_strtolower($email, 'UTF-8') : strtolower($email);
+}
+
 /** Valida la sintaxis del correo en el servidor (RFC 5322 simplificado de PHP). */
 function isValidEmailFormat(string $email): bool
 {
     return filter_var(trim($email), FILTER_VALIDATE_EMAIL) !== false;
 }
 
-/** RF-01: correo con formato valido y que termina en el dominio institucional. */
+/** Dominio institucional sin la arroba inicial (p. ej. "itesa.edu.mx"). */
+function institutionalEmailDomain(): string
+{
+    return strtolower(ltrim(INSTITUTIONAL_EMAIL_DOMAIN, '@'));
+}
+
+/**
+ * RF-01: correo con formato valido cuyo dominio es exactamente el
+ * institucional. Rechaza subdominios ("@sub.itesa.edu.mx") y dominios que
+ * solo terminan igual ("@falso-itesa.edu.mx").
+ */
 function isInstitutionalEmail(string $email): bool
 {
-    return isValidEmailFormat($email)
-        && str_ends_with(strtolower(trim($email)), strtolower(INSTITUTIONAL_EMAIL_DOMAIN));
+    $email = normalizeEmail($email);
+
+    if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        return false;
+    }
+
+    $parts = explode('@', $email);
+    if (count($parts) !== 2) {
+        return false;
+    }
+
+    [$localPart, $domain] = $parts;
+
+    return $localPart !== ''
+        && preg_match('/^[a-z0-9._-]+$/', $localPart) === 1
+        && $domain === institutionalEmailDomain();
+}
+
+/**
+ * Atributo HTML "pattern" equivalente a isInstitutionalEmail() para validar en
+ * el navegador. El dominio admite mayusculas porque el servidor normaliza.
+ * Se escapa para el modo "v" de las expresiones regulares de pattern.
+ */
+function institutionalEmailHtmlPattern(): string
+{
+    $domainPattern = '';
+    foreach (str_split(institutionalEmailDomain()) as $character) {
+        $domainPattern .= ctype_alpha($character)
+            ? '[' . strtolower($character) . strtoupper($character) . ']'
+            : '\\' . $character;
+    }
+
+    return '[A-Za-z0-9._\\-]+@' . $domainPattern;
+}
+
+/**
+ * Atributos comunes de los <input> de correo institucional: pattern para el
+ * navegador y data-institutional-email para js/validation.js.
+ */
+function institutionalEmailInputAttributes(): string
+{
+    return 'pattern="' . sanitizeText(institutionalEmailHtmlPattern()) . '"'
+        . ' title="Usa tu correo institucional ' . sanitizeText(INSTITUTIONAL_EMAIL_DOMAIN) . '"'
+        . ' data-institutional-email="' . sanitizeText(institutionalEmailDomain()) . '"'
+        . ' autocomplete="email" autocapitalize="none" spellcheck="false"';
 }
 
 /**
