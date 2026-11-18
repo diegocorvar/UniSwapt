@@ -18,17 +18,18 @@ if (!isInstitutionalEmail($email)) {
 $userModel = new User();
 $user = $userModel->findByEmail($email);
 
-// No revelamos si el correo existe o no, por seguridad; el mensaje es el mismo en ambos casos.
+$delivery = null;
+$directLink = null;
+
 if ($user) {
     $token = $userModel->createToken((int) $user['id'], 'restablecer_password', PASSWORD_RESET_TTL_HOURS);
-    $inboxPath = Mailer::sendPasswordResetEmail($user['email'], $user['full_name'], $token);
-
-    $_SESSION['pending_email_action'] = [
-        'mode'        => 'restablecimiento',
-        'email'       => $email,
-        'inbox_path'  => $inboxPath,
-        'direct_link' => 'reset-password.php?token=' . $token,
-    ];
+    // Si el envio falla se registra en error_log, pero no se informa: hacerlo
+    // revelaria que el correo pertenece a una cuenta.
+    $delivery = Mailer::sendPasswordResetEmail($user['email'], $user['full_name'], $token);
+    $directLink = 'reset-password.php?token=' . $token;
 }
+
+// No revelamos si el correo existe: en ambos casos se muestra la misma pantalla.
+$_SESSION['pending_email_action'] = pendingEmailAction('restablecimiento', $email, $delivery, $directLink);
 
 redirectTo('../../check-email.php');

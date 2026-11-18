@@ -113,6 +113,25 @@ function institutionalEmailInputAttributes(): string
 }
 
 /**
+ * Datos que muestra check-email.php tras enviar un correo. El enlace directo
+ * solo existe en modo local (bandeja simulada); con envio real nunca se
+ * expone, porque permitiria verificar una cuenta sin acceso al buzon.
+ *
+ * @param array{sent: bool, inbox_path: ?string}|null $delivery null si no se envio nada.
+ */
+function pendingEmailAction(string $mode, string $email, ?array $delivery = null, ?string $directLink = null): array
+{
+    $inboxPath = $delivery['inbox_path'] ?? null;
+
+    return [
+        'mode'        => $mode,
+        'email'       => $email,
+        'inbox_path'  => $inboxPath,
+        'direct_link' => $inboxPath !== null ? $directLink : null,
+    ];
+}
+
+/**
  * Devuelve el tipo MIME real de un archivo subido, inspeccionando su contenido
  * en el servidor. Nunca usa $_FILES[...]['type'], porque ese valor lo envia el
  * cliente y puede falsificarse.

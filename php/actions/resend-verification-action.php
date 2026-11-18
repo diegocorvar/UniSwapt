@@ -22,14 +22,9 @@ $user = $userModel->findByEmail($email);
 if ($user && $user['account_status'] === 'pendiente') {
     $userModel->invalidateTokens((int) $user['id'], 'verificacion_cuenta');
     $token = $userModel->createToken((int) $user['id'], 'verificacion_cuenta', VERIFICATION_TOKEN_TTL_HOURS);
-    $inboxPath = Mailer::sendVerificationEmail($user['email'], $user['full_name'], $token);
+    $delivery = Mailer::sendVerificationEmail($user['email'], $user['full_name'], $token);
 
-    $_SESSION['pending_email_action'] = [
-        'mode'        => 'verificacion',
-        'email'       => $user['email'],
-        'inbox_path'  => $inboxPath,
-        'direct_link' => 'verify.php?token=' . $token,
-    ];
+    $_SESSION['pending_email_action'] = pendingEmailAction('verificacion', $user['email'], $delivery, 'verify.php?token=' . $token);
 
     redirectTo('../../check-email.php');
 }

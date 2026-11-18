@@ -50,13 +50,14 @@ if ($userModel->emailExists($email)) {
 // HU-01, Escenario 1: cuenta creada en estado pendiente de verificacion.
 $userId = $userModel->register($fullName, $email, $password);
 $token = $userModel->createToken($userId, 'verificacion_cuenta', VERIFICATION_TOKEN_TTL_HOURS);
-$inboxPath = Mailer::sendVerificationEmail($email, $fullName, $token);
+$delivery = Mailer::sendVerificationEmail($email, $fullName, $token);
 
-$_SESSION['pending_email_action'] = [
-    'mode'        => 'verificacion',
-    'email'       => $email,
-    'inbox_path'  => $inboxPath,
-    'direct_link' => 'verify.php?token=' . $token,
-];
+if (!$delivery['sent']) {
+    // La cuenta ya existe en estado pendiente: el usuario puede pedir otro enlace.
+    flashMessage('error', 'Tu cuenta fue creada, pero no pudimos enviar el correo de verificacion. Intenta reenviarlo en unos minutos.');
+    redirectTo('../../resend-verification.php');
+}
+
+$_SESSION['pending_email_action'] = pendingEmailAction('verificacion', $email, $delivery, 'verify.php?token=' . $token);
 
 redirectTo('../../check-email.php');
