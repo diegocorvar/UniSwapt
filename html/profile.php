@@ -1,5 +1,5 @@
 <div class="profile-header">
-    <img class="profile-photo-lg" src="<?= $profileUser['profile_photo'] ? sanitizeText(UPLOAD_URL_PROFILES . $profileUser['profile_photo']) : 'assets/images/default-avatar.svg' ?>" alt="">
+    <img class="profile-photo-lg" src="<?= $profileUser['profile_photo'] ? sanitizeText(resolveUploadUrl($profileUser['profile_photo'], 'profiles')) : 'assets/images/default-avatar.svg' ?>" alt="">
     <div>
         <h1 style="margin-bottom:4px;"><?= sanitizeText($profileUser['full_name']) ?></h1>
         <p class="text-muted" style="margin-bottom:4px;">
@@ -68,7 +68,7 @@
             <article class="product-card">
                 <div class="product-card-image">
                     <?php if ($publication['cover_image']): ?>
-                        <img src="<?= sanitizeText(UPLOAD_URL_PRODUCTS . $publication['cover_image']) ?>" alt="">
+                        <img src="<?= sanitizeText(resolveUploadUrl($publication['cover_image'], 'products')) ?>" alt="">
                     <?php else: ?><span>Sin imagen</span><?php endif; ?>
                 </div>
                 <div class="product-card-body">

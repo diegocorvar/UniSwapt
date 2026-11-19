@@ -42,14 +42,13 @@ if (!empty($_FILES['profile_photo']['name'])) {
         redirectTo('../../profile.php');
     }
 
-    if (!is_dir(UPLOAD_DIR_PROFILES)) {
-        mkdir(UPLOAD_DIR_PROFILES, 0755, true);
-    }
-
+    // Supabase Storage en "profiles/<archivo>" o assets/uploads/profiles/ en local;
+    // se guarda en la base lo que devuelva ImageStorage (URL publica o nombre).
     $extension = extensionForImageMime($mimeType);
-    $profilePhotoPath = 'perfil_' . currentUserId() . '_' . time() . '.' . $extension;
+    $fileName = 'perfil_' . currentUserId() . '_' . time() . '.' . $extension;
+    $profilePhotoPath = ImageStorage::store((string) $file['tmp_name'], ImageStorage::TYPE_PROFILES, $fileName);
 
-    if (!move_uploaded_file($file['tmp_name'], UPLOAD_DIR_PROFILES . $profilePhotoPath)) {
+    if ($profilePhotoPath === null) {
         flashMessage('error', 'No fue posible guardar la foto de perfil.');
         redirectTo('../../profile.php');
     }

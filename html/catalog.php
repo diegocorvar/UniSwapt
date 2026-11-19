@@ -72,7 +72,7 @@
             <article class="product-card">
                 <div class="product-card-image">
                     <?php if ($publication['cover_image']): ?>
-                        <img src="<?= sanitizeText(UPLOAD_URL_PRODUCTS . $publication['cover_image']) ?>" alt="<?= sanitizeText($publication['title']) ?>">
+                        <img src="<?= sanitizeText(resolveUploadUrl($publication['cover_image'], 'products')) ?>" alt="<?= sanitizeText($publication['title']) ?>">
                     <?php else: ?>
                         <span>Sin imagen</span>
                     <?php endif; ?>

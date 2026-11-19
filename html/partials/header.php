@@ -33,7 +33,7 @@ $navUser = isLoggedIn() ? (new User())->findById(currentUserId()) : null;
         <div class="navbar-user">
             <?php if (isLoggedIn() && $navUser): ?>
                 <a href="profile.php" class="navbar-user" style="text-decoration:none;">
-                    <img class="avatar-chip" src="<?= $navUser['profile_photo'] ? sanitizeText(UPLOAD_URL_PROFILES . $navUser['profile_photo']) : 'assets/images/default-avatar.svg' ?>" alt="">
+                    <img class="avatar-chip" src="<?= $navUser['profile_photo'] ? sanitizeText(resolveUploadUrl($navUser['profile_photo'], 'profiles')) : 'assets/images/default-avatar.svg' ?>" alt="">
                     <span><?= sanitizeText($navUser['full_name']) ?></span>
                 </a>
                 <a href="logout.php" class="btn btn-secondary btn-sm">Cerrar sesion</a>

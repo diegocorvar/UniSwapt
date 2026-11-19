@@ -167,6 +167,23 @@ function extensionForImageMime(string $mimeType): ?string
     };
 }
 
+/**
+ * URL para el atributo src de una imagen subida. Las guardadas en Supabase
+ * Storage ya son URLs absolutas y se devuelven tal cual; las locales son solo
+ * el nombre del archivo y se les antepone su carpeta publica.
+ *
+ * @param string $type 'products' (imagenes de publicaciones) o 'profiles' (fotos de perfil).
+ */
+function resolveUploadUrl(string $path, string $type = 'products'): string
+{
+    if (preg_match('#^https?://#i', $path) === 1) {
+        return $path;
+    }
+
+    $baseUrl = $type === 'profiles' ? UPLOAD_URL_PROFILES : UPLOAD_URL_PRODUCTS;
+    return $baseUrl . $path;
+}
+
 function formatPrice(float $price): string
 {
     return '$' . number_format($price, 2);

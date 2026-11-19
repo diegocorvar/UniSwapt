@@ -10,7 +10,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
     <div>
         <div class="gallery-main">
             <?php if (!empty($images)): ?>
-                <img id="gallery-main-image" src="<?= sanitizeText(UPLOAD_URL_PRODUCTS . $images[0]['image_path']) ?>" alt="<?= sanitizeText($publication['title']) ?>">
+                <img id="gallery-main-image" src="<?= sanitizeText(resolveUploadUrl($images[0]['image_path'], 'products')) ?>" alt="<?= sanitizeText($publication['title']) ?>">
             <?php else: ?>
                 <div class="empty-state">Sin imagenes</div>
             <?php endif; ?>
@@ -18,7 +18,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
         <?php if (count($images) > 1): ?>
             <div class="gallery-thumbs">
                 <?php foreach ($images as $index => $image): ?>
-                    <img src="<?= sanitizeText(UPLOAD_URL_PRODUCTS . $image['image_path']) ?>" class="<?= $index === 0 ? 'is-active' : '' ?>" onclick="document.getElementById('gallery-main-image').src=this.src; document.querySelectorAll('.gallery-thumbs img').forEach(t=>t.classList.remove('is-active')); this.classList.add('is-active');">
+                    <img src="<?= sanitizeText(resolveUploadUrl($image['image_path'], 'products')) ?>" class="<?= $index === 0 ? 'is-active' : '' ?>" onclick="document.getElementById('gallery-main-image').src=this.src; document.querySelectorAll('.gallery-thumbs img').forEach(t=>t.classList.remove('is-active')); this.classList.add('is-active');">
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -47,7 +47,7 @@ $statusBadgeClass = match ($publication['publication_status']) {
         <div class="seller-card" style="margin: var(--space-5) 0;">
             <?php
                 $sellerAvatar = !empty($publication['seller_photo'])
-                    ? UPLOAD_URL_PROFILES . $publication['seller_photo']
+                    ? resolveUploadUrl($publication['seller_photo'], 'profiles')
                     : 'assets/images/default-avatar.svg';
             ?>
             <img class="avatar-chip" style="width:44px;height:44px;" src="<?= sanitizeText($sellerAvatar) ?>" alt="Foto de <?= sanitizeText($publication['seller_name']) ?>">

@@ -75,6 +75,10 @@ define('UPLOAD_DIR_PROFILES', __DIR__ . '/../../assets/uploads/profiles/');
 define('UPLOAD_URL_PRODUCTS', 'assets/uploads/products/');
 define('UPLOAD_URL_PROFILES', 'assets/uploads/profiles/');
 
+// Supabase Storage (produccion): bucket usado si no se define SUPABASE_STORAGE_BUCKET.
+// Sin SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY se usan las carpetas locales de arriba.
+define('SUPABASE_STORAGE_DEFAULT_BUCKET', 'uniswapt-uploads');
+
 // Bandeja de correo simulada (Flujo 04): en este prototipo local no existe
 // un servidor SMTP real, asi que los "correos" se guardan aqui para poder
 // revisarlos como si fuera la bandeja de entrada del usuario.

@@ -42,13 +42,23 @@ class Publication
         );
     }
 
-    /** HU-07: asocia una imagen a la publicacion; la primera se marca como portada. */
-    public function addImage(int $publicationId, string $imagePath, bool $isCover): void
+    /**
+     * HU-07: guarda la imagen subida (Supabase Storage en "products/<archivo>" o
+     * assets/uploads/products/ en local) y la asocia a la publicacion; la primera
+     * se marca como portada. Devuelve false si no se pudo guardar el archivo.
+     */
+    public function addImage(int $publicationId, string $tmpPath, string $fileName, bool $isCover): bool
     {
+        $imagePath = ImageStorage::store($tmpPath, ImageStorage::TYPE_PRODUCTS, $fileName);
+        if ($imagePath === null) {
+            return false;
+        }
+
         $stmt = $this->db->prepare(
             'INSERT INTO publication_images (publication_id, image_path, is_cover) VALUES (:pub_id, :path, :is_cover)'
         );
         $stmt->execute(['pub_id' => $publicationId, 'path' => $imagePath, 'is_cover' => $isCover ? 1 : 0]);
+        return true;
     }
 
     public function getImages(int $publicationId): array

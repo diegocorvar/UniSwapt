@@ -93,19 +93,12 @@ $publicationId = $publicationModel->create(currentUserId(), [
     'material_category' => $materialCategory,
 ]);
 
-if (!is_dir(UPLOAD_DIR_PRODUCTS)) {
-    mkdir(UPLOAD_DIR_PRODUCTS, 0755, true);
-}
-
 $imagesSaved = 0;
 foreach ($validImages as $image) {
     $fileName = 'pub_' . $publicationId . '_' . $imagesSaved . '_' . time() . '.' . $image['extension'];
-    if (!move_uploaded_file($image['tmp_path'], UPLOAD_DIR_PRODUCTS . $fileName)) {
-        continue;
+    if ($publicationModel->addImage($publicationId, $image['tmp_path'], $fileName, $imagesSaved === 0)) {
+        $imagesSaved++;
     }
-
-    $publicationModel->addImage($publicationId, $fileName, $imagesSaved === 0);
-    $imagesSaved++;
 }
 
 flashMessage('success', 'Tu publicacion fue creada y ya esta visible en el catalogo.');

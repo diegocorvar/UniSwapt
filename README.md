@@ -59,6 +59,9 @@ correos reales con la API de Brevo y esa pantalla ya no muestra el enlace
 | `MAIL_API_KEY` | Si | API key de Brevo. Si falta, los correos se guardan en `html/emails/` (solo para desarrollo local). |
 | `MAIL_FROM_EMAIL` | Si | Remitente verificado en Brevo. |
 | `MAIL_FROM_NAME` | No | Nombre del remitente (por defecto `UniSwapt ITESA`). |
+| `SUPABASE_URL` | Si | URL del proyecto de Supabase (p. ej. `https://xxxx.supabase.co`). Junto con la siguiente, activa Supabase Storage para las imagenes. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Si | Clave *service_role* de Supabase (secreta, solo en el servidor). Se usa para subir las imagenes. Si falta esta o `SUPABASE_URL`, las imagenes se guardan en `assets/uploads/` (solo para desarrollo local: el disco de Railway se borra en cada despliegue). |
+| `SUPABASE_STORAGE_BUCKET` | No | Bucket de las imagenes (por defecto `uniswapt-uploads`). Debe existir y ser **publico**; dentro se usan las carpetas `products/` y `profiles/`. |
 
 3. **Extensiones PHP:** `composer.json` declara `pdo_pgsql`, `curl`,
    `mbstring` y `fileinfo`, que el builder de Railway instala a partir de el.
