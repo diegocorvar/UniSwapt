@@ -10,6 +10,9 @@ define('INSTITUTIONAL_EMAIL_DOMAIN', '@itesa.edu.mx');
 // HU-02: vigencia del token de verificacion de cuenta (en horas).
 define('VERIFICATION_TOKEN_TTL_HOURS', 24);
 
+// HU-02 (reenvio): segundos minimos entre dos enlaces de verificacion para la misma cuenta.
+define('VERIFICATION_RESEND_COOLDOWN_SECONDS', 60);
+
 // HU-05: vigencia del token de restablecimiento de contrasena (en horas).
 define('PASSWORD_RESET_TTL_HOURS', 1);
 

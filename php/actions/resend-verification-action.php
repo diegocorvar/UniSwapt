@@ -7,28 +7,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 requireValidCsrfToken('../../resend-verification.php');
 
-$email = trim($_POST['email'] ?? '');
+$email = normalizeEmail((string) ($_POST['email'] ?? ''));
 
-if (!isValidEmailFormat($email)) {
-    flashMessage('error', 'Ingresa un correo electronico con formato valido.');
+// Solo existen cuentas con el dominio institucional exacto.
+if (!isInstitutionalEmail($email)) {
+    flashMessage('error', 'Ingresa tu correo institucional (' . INSTITUTIONAL_EMAIL_DOMAIN . ') con un formato valido.');
     redirectTo('../../resend-verification.php');
 }
 
 $userModel = new User();
 $user = $userModel->findByEmail($email);
+$delivery = null;
+$directLink = null;
 
-// HU-02: solo las cuentas pendientes reciben un nuevo enlace. Los tokens de
-// verificacion anteriores se invalidan para que solo funcione el mas reciente.
-if ($user && $user['account_status'] === 'pendiente') {
-    $userModel->invalidateTokens((int) $user['id'], 'verificacion_cuenta');
-    $token = $userModel->createToken((int) $user['id'], 'verificacion_cuenta', VERIFICATION_TOKEN_TTL_HOURS);
+// HU-02: solo las cuentas pendientes reciben un nuevo enlace; los anteriores
+// se invalidan para que unicamente funcione el mas reciente.
+$token = $user ? $userModel->regenerateVerificationToken((int) $user['id']) : null;
+
+if ($token !== null) {
+    // Un fallo de envio se registra en error_log, pero no se informa para no
+    // revelar que el correo pertenece a una cuenta pendiente.
     $delivery = Mailer::sendVerificationEmail($user['email'], $user['full_name'], $token);
-
-    $_SESSION['pending_email_action'] = pendingEmailAction('verificacion', $user['email'], $delivery, 'verify.php?token=' . $token);
-
-    redirectTo('../../check-email.php');
+    $directLink = 'verify.php?token=' . $token;
 }
 
-// Mismo mensaje si el correo no existe o si la cuenta ya esta activa.
-flashMessage('info', 'Si el correo corresponde a una cuenta pendiente de verificacion, te enviamos un nuevo enlace.');
-redirectTo('../../login.php');
+// Respuesta identica si el correo no existe, si la cuenta ya esta activa o si
+// se pidio otro enlace hace muy poco.
+$_SESSION['pending_email_action'] = pendingEmailAction('reenvio', $email, $delivery, $directLink);
+redirectTo('../../check-email.php');

@@ -77,6 +77,57 @@ class User
         $stmt->execute(['user_id' => $userId, 'type' => $type]);
     }
 
+    /**
+     * HU-02 (reenvio): si la cuenta sigue "pendiente", invalida los tokens de
+     * verificacion anteriores y genera uno nuevo en una sola transaccion.
+     * Devuelve null si la cuenta no esta pendiente o si ya se genero un enlace
+     * hace menos de VERIFICATION_RESEND_COOLDOWN_SECONDS (evita abusar del envio).
+     */
+    public function regenerateVerificationToken(int $userId): ?string
+    {
+        $this->db->beginTransaction();
+        try {
+            $user = $this->findById($userId);
+            if (!$user || $user['account_status'] !== 'pendiente' || $this->hasRecentVerificationToken($userId)) {
+                $this->db->rollBack();
+                return null;
+            }
+
+            $this->invalidateTokens($userId, 'verificacion_cuenta');
+            $token = $this->createToken($userId, 'verificacion_cuenta', VERIFICATION_TOKEN_TTL_HOURS);
+            $this->db->commit();
+
+            return $token;
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    /**
+     * Un token creado hace menos del periodo de espera vence despues de
+     * (ahora + TTL - espera). Se compara contra expires_at porque esa fecha la
+     * genera PHP, igual que la referencia, sin depender de la zona del motor.
+     */
+    private function hasRecentVerificationToken(int $userId): bool
+    {
+        $threshold = (new DateTime())
+            ->modify('+' . VERIFICATION_TOKEN_TTL_HOURS . ' hours')
+            ->modify('-' . VERIFICATION_RESEND_COOLDOWN_SECONDS . ' seconds')
+            ->format('Y-m-d H:i:s');
+
+        $stmt = $this->db->prepare(
+            "SELECT 1 FROM tokens
+             WHERE user_id = :user_id AND token_type = 'verificacion_cuenta' AND used = 0
+               AND expires_at > :threshold
+             LIMIT 1"
+        );
+        $stmt->execute(['user_id' => $userId, 'threshold' => $threshold]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function markTokenAsUsed(int $tokenId): void
     {
         $stmt = $this->db->prepare('UPDATE tokens SET used = 1 WHERE id = :id');

@@ -14,7 +14,7 @@ $isSimulatedDelivery = !empty($pendingAction['inbox_path']);
     'reenvio' => [
         'Revisa tu correo',
         "Si {$safeEmail} corresponde a una cuenta pendiente de verificacion, enviamos un nuevo enlace de activacion. "
-            . 'Los enlaces anteriores dejaron de funcionar.',
+            . 'Usa siempre el enlace del correo mas reciente.',
     ],
     default => [
         'Confirma tu correo',
