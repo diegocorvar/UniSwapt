@@ -38,10 +38,32 @@ Lo unico que esta simulado es el **transporte** del correo (no hay un
 servidor SMTP conectado en este entorno local). En vez de enviarse a una
 bandeja externa, cada "correo" se guarda como un archivo HTML dentro de
 `html/emails/` y, para que puedas probar el flujo sin salir del navegador,
-la pantalla "Revisa tu correo" te da un enlace directo para abrirlo. En un
-despliegue real, la clase `php/classes/Mailer.php` es el unico archivo que
-tendrias que modificar para conectar un proveedor real (SendGrid, SMTP,
-etc.) — toda la logica de generacion/expiracion de tokens seguiria igual.
+la pantalla "Revisa tu correo" te da un enlace directo para abrirlo. En
+produccion, al definir `MAIL_API_KEY`, `php/classes/Mailer.php` envia los
+correos reales con la API de Brevo y esa pantalla ya no muestra el enlace
+(ver "Despliegue en produccion").
+
+## Despliegue en produccion (Railway + Supabase)
+
+1. **Base de datos:** en Supabase abre *SQL Editor*, pega el contenido de
+   `database/schema_postgres.sql` y ejecutalo. Crea todas las tablas,
+   restricciones, indices y habilita RLS; ademas registra las migraciones
+   existentes en `schema_migrations` para que la app no las vuelva a aplicar.
+   (Si la base esta vacia, la app tambien aplica ese esquema sola al arrancar.)
+2. **Variables de entorno en Railway:**
+
+| Variable | Obligatoria | Descripcion |
+|---|---|---|
+| `DATABASE_URL` | Si | Cadena de conexion de Supabase (`postgresql://usuario:clave@host:puerto/postgres`). Railway no tiene IPv6: usa la del *Session pooler* (puerto 5432); el *Transaction pooler* (6543) tambien funciona. Siempre se conecta con `sslmode=require`. |
+| `APP_URL` | Si | URL publica de la app, sin barra final (p. ej. `https://uniswapt.up.railway.app`). Se usa en los enlaces de los correos. |
+| `MAIL_API_KEY` | Si | API key de Brevo. Si falta, los correos se guardan en `html/emails/` (solo para desarrollo local). |
+| `MAIL_FROM_EMAIL` | Si | Remitente verificado en Brevo. |
+| `MAIL_FROM_NAME` | No | Nombre del remitente (por defecto `UniSwapt ITESA`). |
+
+3. **Extensiones PHP:** `composer.json` declara `pdo_pgsql`, `curl`,
+   `mbstring` y `fileinfo`, que el builder de Railway instala a partir de el.
+
+Sin `DATABASE_URL` la app sigue usando SQLite local, como se describe arriba.
 
 ## Estructura de carpetas
 
@@ -64,8 +86,10 @@ uniswapt/
 │   ├── includes/          bootstrap.php, session.php, helpers.php
 │   └── actions/           Procesan cada formulario (POST) y redirigen
 └── database/
-    ├── schema.sql         Definicion de tablas
-    └── uniswapt.sqlite    Base de datos (se genera sola)
+    ├── schema.sql         Definicion de tablas (SQLite local)
+    ├── schema_postgres.sql Esquema completo para Supabase/PostgreSQL
+    ├── migrations/        Migraciones aplicadas una sola vez al arrancar
+    └── uniswapt.sqlite    Base de datos local (se genera sola)
 ```
 
 Cada pagina en la raiz sigue el mismo patron: obtiene los datos necesarios
@@ -90,7 +114,7 @@ base de datos y redirigen de regreso con un mensaje flash.
 | Flujo 01 Negociacion | `php/classes/Transaction.php`, pestaña "Propuestas" en `dashboard.php` |
 | Flujo 02 Entrega y cierre | `php/actions/confirm-delivery-action.php` |
 | Flujo 03 Reputacion y moderacion | `rate.php`, `php/actions/report-action.php`, `admin.php` |
-| Flujo 04 Notificaciones por correo | `php/classes/Mailer.php` (simulado, ver seccion anterior) |
+| Flujo 04 Notificaciones por correo | `php/classes/Mailer.php` (Brevo en produccion, bandeja simulada en local) |
 | Flujo 06-A Contacto por WhatsApp | `buildWhatsAppLink()` en `php/includes/helpers.php` |
 
 Los Flujos 05 (push/WebSockets) y 06-B (Cloudinary/S3) descritos en el
