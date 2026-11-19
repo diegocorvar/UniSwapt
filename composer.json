@@ -1,13 +1,13 @@
 {
   "name": "itesa/uniswapt",
-  "description": "Plataforma de intercambio y venta de material académico ITESA",
+  "description": "Plataforma académica UniSwapt",
   "require": {
-    "php": "^8.1",
+    "php": "^8.4",
     "ext-pdo": "*",
     "ext-pdo_pgsql": "*",
     "ext-pdo_sqlite": "*",
-    "ext-curl": "*",
     "ext-fileinfo": "*",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "ext-curl": "*"
   }
 }
